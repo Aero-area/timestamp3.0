@@ -4,40 +4,49 @@
     "slug": "stamp-time-tracking",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+
+    "icon": "./assets/images/timestamp.png",
+
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+
     "splash": {
       "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "app.rork.stamp-time-tracking"
+      // "icon" would inherit from the top-level "icon"
     },
+
     "android": {
+      // This will work, but for a perfect adaptive icon you'd ideally
+      // use a transparent foreground image + backgroundColor.
+      "icon": "./assets/images/timestamp.png",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/images/timestamp.png",
+        "backgroundColor": "#008C3A"
       },
       "package": "app.rork.stamp-time-tracking"
     },
+
     "web": {
       "bundler": "metro",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/timestamp.png",
+      "display": "standalone",
+      "themeColor": "#008C3A",
+      "backgroundColor": "#008C3A"
     },
+
     "plugins": [
-      [
-        "expo-router",
-        {
-          "origin": "https://rork.com/"
-        }
-      ]
+      ["expo-router", { "origin": "https://rork.com/" }],
+      "expo-web-browser"
     ],
-    "experiments": {
-      "typedRoutes": true
-    }
+
+    "experiments": { "typedRoutes": true }
   }
 }

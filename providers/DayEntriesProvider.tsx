@@ -6,12 +6,11 @@ import { useSettings } from "./SettingsProvider";
 import { useToast } from "./ToastProvider";
 import { useOfflineQueue } from "./OfflineQueueProvider";
 import type { DayEntry } from "@/types";
-import { durationHHMM } from "@/lib/time";
-import { dayKeyCph } from "@/lib/time";
+import { durationHHMM, logicalDateCph } from "@/lib/time";
 
 export const [DayEntriesProvider, useDayEntries] = createContextHook(() => {
   const { user } = useAuth();
-  const { currentPeriod } = useSettings();
+  const { currentPeriod, settings } = useSettings();
   const { showToast } = useToast();
   const { queueStamp, processQueue, setOffline, setOnline, hasQueuedItems } = useOfflineQueue();
   const [dayEntries, setDayEntries] = useState<DayEntry[]>([]);
@@ -53,7 +52,7 @@ export const [DayEntriesProvider, useDayEntries] = createContextHook(() => {
     loadEntries();
   }, [loadEntries]);
 
-  // Perform stamp operation with Supabase
+  // Perform stamp operation with Supabase using logical date
   const performStamp = useCallback(async (nowUtc: Date) => {
     const supabase = getSupabase();
     if (!supabase || !user) {
@@ -61,15 +60,16 @@ export const [DayEntriesProvider, useDayEntries] = createContextHook(() => {
     }
 
     const timestamp = nowUtc.toISOString();
-    const todayDate = dayKeyCph(nowUtc);
+    // Use logical date based on rollover hour
+    const logicalDate = logicalDateCph(nowUtc, settings.rollover_hour);
 
     try {
-      // Get existing entry for today
+      // Get existing entry for the logical date
       const { data: existingEntries, error: fetchError } = await supabase
         .from('day_entries')
         .select('*')
         .eq('user_id', user.id)
-        .eq('date_utc', todayDate)
+        .eq('date_utc', logicalDate)
         .limit(1);
 
       if (fetchError) {
@@ -84,7 +84,7 @@ export const [DayEntriesProvider, useDayEntries] = createContextHook(() => {
         // No row exists - create with start_ts
         updatedEntry = {
           user_id: user.id,
-          date_utc: todayDate,
+          date_utc: logicalDate,
           start_ts: timestamp,
           end_ts: null,
           total_hhmm: null,
@@ -135,7 +135,7 @@ export const [DayEntriesProvider, useDayEntries] = createContextHook(() => {
         .from('day_entries')
         .upsert({
           user_id: user.id,
-          date_utc: todayDate,
+          date_utc: logicalDate,
           ...updatedEntry,
         }, {
           onConflict: 'user_id,date_utc',
@@ -154,7 +154,7 @@ export const [DayEntriesProvider, useDayEntries] = createContextHook(() => {
       setOffline();
       throw error;
     }
-  }, [user, loadEntries, showToast, setOnline, setOffline]);
+  }, [user, loadEntries, showToast, setOnline, setOffline, settings.rollover_hour]);
 
   // Process offline queue when back online
   useEffect(() => {

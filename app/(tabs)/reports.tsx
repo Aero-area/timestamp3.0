@@ -12,6 +12,8 @@ import {
 import { Download, FileText, FileSpreadsheet, Calendar } from "@/components/icons";
 import { useToast } from "@/providers/ToastProvider";
 import { api } from "@/utils/api";
+import { colors } from "@/constants/colors";
+import { t } from "@/constants/strings";
 
 export default function ReportsScreen() {
   const { showToast } = useToast();
@@ -21,12 +23,12 @@ export default function ReportsScreen() {
 
   const validateDates = () => {
     if (!dateFrom || !dateTo) {
-      showToast("Please select both start and end dates", "error");
+      showToast(t.pleaseSelectDates, "error");
       return false;
     }
     
     if (new Date(dateTo) < new Date(dateFrom)) {
-      showToast("End date cannot be before start date", "error");
+      showToast(t.endDateBeforeStart, "error");
       return false;
     }
     
@@ -53,9 +55,9 @@ export default function ReportsScreen() {
         await Linking.openURL(url);
       }
       
-      showToast("CSV exported successfully", "success");
+      showToast(t.csvExportedSuccessfully, "success");
     } catch (error: any) {
-      showToast(error.message || "Failed to export CSV", "error");
+      showToast(error.message || t.failedToExport, "error");
     } finally {
       setIsExporting(false);
     }
@@ -81,9 +83,9 @@ export default function ReportsScreen() {
         await Linking.openURL(url);
       }
       
-      showToast("PDF exported successfully", "success");
+      showToast(t.pdfExportedSuccessfully, "success");
     } catch (error: any) {
-      showToast(error.message || "Failed to export PDF", "error");
+      showToast(error.message || t.failedToExport, "error");
     } finally {
       setIsExporting(false);
     }
@@ -103,30 +105,30 @@ export default function ReportsScreen() {
       <View style={styles.content}>
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <Calendar size={20} color="#4F46E5" />
-            <Text style={styles.cardTitle}>Select Date Range</Text>
+            <Calendar size={20} color={colors.primary} />
+            <Text style={styles.cardTitle}>{t.selectDateRange}</Text>
           </View>
           
           <View style={styles.dateInputContainer}>
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>From Date</Text>
+              <Text style={styles.inputLabel}>{t.fromDate}</Text>
               <TextInput
                 style={styles.dateInput}
                 placeholder="YYYY-MM-DD"
                 value={dateFrom}
                 onChangeText={setDateFrom}
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor={colors.textMuted}
               />
             </View>
             
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>To Date</Text>
+              <Text style={styles.inputLabel}>{t.toDate}</Text>
               <TextInput
                 style={styles.dateInput}
                 placeholder="YYYY-MM-DD"
                 value={dateTo}
                 onChangeText={setDateTo}
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor={colors.textMuted}
               />
             </View>
           </View>
@@ -135,12 +137,12 @@ export default function ReportsScreen() {
             style={styles.quickButton}
             onPress={setLast7Days}
           >
-            <Text style={styles.quickButtonText}>Last 7 Days</Text>
+            <Text style={styles.quickButtonText}>{t.last7Days}</Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.exportSection}>
-          <Text style={styles.exportTitle}>Export Options</Text>
+          <Text style={styles.exportTitle}>{t.exportOptions}</Text>
           
           <TouchableOpacity
             style={[
@@ -152,17 +154,17 @@ export default function ReportsScreen() {
             disabled={isExporting}
           >
             {isExporting ? (
-              <ActivityIndicator size="small" color="#FFFFFF" />
+              <ActivityIndicator size="small" color={colors.onPrimary} />
             ) : (
               <>
-                <FileSpreadsheet size={24} color="#FFFFFF" />
+                <FileSpreadsheet size={24} color={colors.onPrimary} />
                 <View style={styles.exportButtonContent}>
-                  <Text style={styles.exportButtonTitle}>Export CSV</Text>
+                  <Text style={styles.exportButtonTitle}>{t.exportCSV}</Text>
                   <Text style={styles.exportButtonSubtitle}>
-                    Spreadsheet format for analysis
+                    {t.csvDescription}
                   </Text>
                 </View>
-                <Download size={20} color="#FFFFFF" />
+                <Download size={20} color={colors.onPrimary} />
               </>
             )}
           </TouchableOpacity>
@@ -177,17 +179,17 @@ export default function ReportsScreen() {
             disabled={isExporting}
           >
             {isExporting ? (
-              <ActivityIndicator size="small" color="#FFFFFF" />
+              <ActivityIndicator size="small" color={colors.onPrimary} />
             ) : (
               <>
-                <FileText size={24} color="#FFFFFF" />
+                <FileText size={24} color={colors.onPrimary} />
                 <View style={styles.exportButtonContent}>
-                  <Text style={styles.exportButtonTitle}>Export PDF</Text>
+                  <Text style={styles.exportButtonTitle}>{t.exportPDF}</Text>
                   <Text style={styles.exportButtonSubtitle}>
-                    Formatted report for sharing
+                    {t.pdfDescription}
                   </Text>
                 </View>
-                <Download size={20} color="#FFFFFF" />
+                <Download size={20} color={colors.onPrimary} />
               </>
             )}
           </TouchableOpacity>
@@ -195,12 +197,12 @@ export default function ReportsScreen() {
 
         {(dateFrom && dateTo) && (
           <View style={styles.previewCard}>
-            <Text style={styles.previewTitle}>Report Preview</Text>
+            <Text style={styles.previewTitle}>{t.reportPreview}</Text>
             <Text style={styles.previewText}>
-              Period: {dateFrom} to {dateTo}
+              {t.period}: {dateFrom} {t.to} {dateTo}
             </Text>
             <Text style={styles.previewNote}>
-              Export will include all time entries within this period
+              {t.exportNote}
             </Text>
           </View>
         )}
@@ -212,18 +214,18 @@ export default function ReportsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: colors.background,
   },
   content: {
     padding: 20,
   },
   card: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.backgroundSecondary,
     borderRadius: 12,
     padding: 20,
     marginBottom: 24,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: colors.border,
   },
   cardHeader: {
     flexDirection: "row",
@@ -234,7 +236,7 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#111827",
+    color: colors.text,
   },
   dateInputContainer: {
     gap: 16,
@@ -246,19 +248,20 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 14,
     fontWeight: "500",
-    color: "#374151",
+    color: colors.textSecondary,
   },
   dateInput: {
     height: 44,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: colors.border,
     borderRadius: 8,
     paddingHorizontal: 12,
     fontSize: 14,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.backgroundSecondary,
+    color: colors.text,
   },
   quickButton: {
-    backgroundColor: "#EEF2FF",
+    backgroundColor: colors.backgroundTertiary,
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 8,
@@ -267,7 +270,7 @@ const styles = StyleSheet.create({
   quickButtonText: {
     fontSize: 14,
     fontWeight: "500",
-    color: "#4F46E5",
+    color: colors.primary,
   },
   exportSection: {
     gap: 16,
@@ -275,7 +278,7 @@ const styles = StyleSheet.create({
   exportTitle: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#111827",
+    color: colors.text,
     marginBottom: 8,
   },
   exportButton: {
@@ -289,10 +292,10 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   csvButton: {
-    backgroundColor: "#10B981",
+    backgroundColor: colors.success,
   },
   pdfButton: {
-    backgroundColor: "#EF4444",
+    backgroundColor: colors.error,
   },
   exportButtonContent: {
     flex: 1,
@@ -300,7 +303,7 @@ const styles = StyleSheet.create({
   exportButtonTitle: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#FFFFFF",
+    color: colors.onPrimary,
     marginBottom: 2,
   },
   exportButtonSubtitle: {
@@ -308,7 +311,7 @@ const styles = StyleSheet.create({
     color: "rgba(255, 255, 255, 0.9)",
   },
   previewCard: {
-    backgroundColor: "#F3F4F6",
+    backgroundColor: colors.backgroundTertiary,
     borderRadius: 8,
     padding: 16,
     marginTop: 24,
@@ -316,17 +319,17 @@ const styles = StyleSheet.create({
   previewTitle: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#374151",
+    color: colors.textSecondary,
     marginBottom: 8,
   },
   previewText: {
     fontSize: 14,
-    color: "#6B7280",
+    color: colors.textMuted,
     marginBottom: 4,
   },
   previewNote: {
     fontSize: 12,
-    color: "#9CA3AF",
+    color: colors.textMuted,
     fontStyle: "italic",
   },
 });

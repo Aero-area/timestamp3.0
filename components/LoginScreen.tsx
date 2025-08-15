@@ -12,6 +12,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '@/providers/AuthProvider';
 import { LogIn } from '@/components/icons';
+import { colors } from '@/constants/colors';
+import { t } from '@/constants/strings';
 
 export default function LoginScreen() {
   const { signIn, isLoading } = useAuth();
@@ -20,7 +22,7 @@ export default function LoginScreen() {
 
   const handleSignIn = async () => {
     if (!email.trim() || !password.trim()) {
-      Alert.alert('Error', 'Please enter both email and password');
+      Alert.alert(t.error, t.pleaseSelectDates);
       return;
     }
 
@@ -29,8 +31,8 @@ export default function LoginScreen() {
     if (error) {
       const errorMessage = error && typeof error === 'object' && 'message' in error 
         ? (error as { message: string }).message 
-        : 'Please check your credentials';
-      Alert.alert('Sign In Failed', errorMessage);
+        : t.checkCredentials;
+      Alert.alert(t.loginFailed, errorMessage);
     }
   };
 
@@ -43,38 +45,40 @@ export default function LoginScreen() {
         <View style={styles.content}>
           <View style={styles.header}>
             <View style={styles.iconContainer}>
-              <LogIn size={48} color="#4F46E5" />
+              <LogIn size={48} color={colors.primary} />
             </View>
-            <Text style={styles.title}>Welcome to Stamp</Text>
-            <Text style={styles.subtitle}>Sign in to your account</Text>
+            <Text style={styles.title}>{t.appName}</Text>
+            <Text style={styles.subtitle}>{t.appDescription}</Text>
           </View>
 
           <View style={styles.form}>
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Email</Text>
+              <Text style={styles.label}>{t.email}</Text>
               <TextInput
                 style={styles.input}
                 value={email}
                 onChangeText={setEmail}
-                placeholder="Enter your email"
+                placeholder={t.enterEmail}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
                 editable={!isLoading}
+                placeholderTextColor={colors.textMuted}
               />
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Password</Text>
+              <Text style={styles.label}>{t.password}</Text>
               <TextInput
                 style={styles.input}
                 value={password}
                 onChangeText={setPassword}
-                placeholder="Enter your password"
+                placeholder={t.enterPassword}
                 secureTextEntry
                 autoCapitalize="none"
                 autoCorrect={false}
                 editable={!isLoading}
+                placeholderTextColor={colors.textMuted}
               />
             </View>
 
@@ -84,14 +88,14 @@ export default function LoginScreen() {
               disabled={isLoading}
             >
               <Text style={styles.signInButtonText}>
-                {isLoading ? 'Signing In...' : 'Sign In'}
+                {isLoading ? t.signingIn : t.signIn}
               </Text>
             </TouchableOpacity>
           </View>
 
           <View style={styles.footer}>
             <Text style={styles.footerText}>
-              Sign-ups are disabled. Please contact your administrator for access.
+              {t.signupsDisabled}
             </Text>
           </View>
         </View>
@@ -103,7 +107,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: colors.background,
   },
   keyboardView: {
     flex: 1,
@@ -111,30 +115,30 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     padding: 20,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   header: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 40,
   },
   iconContainer: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#EEF2FF',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: colors.backgroundTertiary,
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: 20,
   },
   title: {
     fontSize: 28,
-    fontWeight: '700',
-    color: '#111827',
+    fontWeight: "700",
+    color: colors.text,
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: '#6B7280',
+    color: colors.textMuted,
   },
   form: {
     marginBottom: 30,
@@ -144,42 +148,42 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#374151',
+    fontWeight: "600",
+    color: colors.textSecondary,
     marginBottom: 8,
   },
   input: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.backgroundSecondary,
     borderWidth: 1,
-    borderColor: '#D1D5DB',
+    borderColor: colors.border,
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 16,
-    color: '#111827',
+    color: colors.text,
   },
   signInButton: {
-    backgroundColor: '#4F46E5',
+    backgroundColor: colors.primary,
     borderRadius: 8,
     paddingVertical: 16,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 10,
   },
   signInButtonDisabled: {
-    backgroundColor: '#9CA3AF',
+    backgroundColor: colors.disabled,
   },
   signInButtonText: {
-    color: '#FFFFFF',
+    color: colors.onPrimary,
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   footer: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   footerText: {
     fontSize: 14,
-    color: '#6B7280',
-    textAlign: 'center',
+    color: colors.textMuted,
+    textAlign: "center",
     lineHeight: 20,
   },
 });

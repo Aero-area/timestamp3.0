@@ -13,6 +13,19 @@ export const toUTCISO = (d: Date | string | number = new Date()) => dayjs(d).utc
 // Day key stored in DB (Copenhagen calendar day)
 export const dayKeyCph = (d: Date | string) => toCph(d).format('YYYY-MM-DD');
 
+// NEW: Logical date calculation based on rollover hour
+export const logicalDateCph = (d: Date | string, rolloverHour: number = 0) => {
+  const date = toCph(d);
+  const hour = date.hour();
+  
+  // If current hour is before rollover hour, use previous day
+  if (hour < rolloverHour) {
+    return date.subtract(1, 'day').format('YYYY-MM-DD');
+  }
+  
+  return date.format('YYYY-MM-DD');
+};
+
 // Display helpers (Copenhagen)
 export const hhmmCph = (iso?: string | Date | null) => (iso ? toCph(iso).format('HH:mm') : '');
 export const dateHumanCph = (d: Date | string) => toCph(d).format('MMM D, YYYY');
@@ -41,14 +54,28 @@ export function formatDurationHMS(seconds: number) {
 export const getTodayCphKey = () => nowCph().format('YYYY-MM-DD');
 
 // Current rollover window computed in Copenhagen; returns day-key strings [start, end)
-export function currentPeriodCph(rolloverDay: number) {
+export function currentPeriodCph(rolloverDay: number, rolloverHour: number = 0) {
   const base = dayjs().tz(TZ);
-  const thisStart = base.date(rolloverDay).startOf('day'); // CPH midnight of rolloverDay this month
-  if (base.date() >= rolloverDay) {
+  const thisStart = base.date(rolloverDay).hour(rolloverHour).minute(0).second(0).millisecond(0);
+  
+  if (base.isAfter(thisStart)) {
     const end = thisStart.add(1, 'month');
-    return { startDateKey: thisStart.format('YYYY-MM-DD'), endDateKey: end.format('YYYY-MM-DD') };
+    return { 
+      startDateKey: thisStart.format('YYYY-MM-DD'), 
+      endDateKey: end.format('YYYY-MM-DD') 
+    };
   } else {
     const prev = thisStart.subtract(1, 'month');
-    return { startDateKey: prev.format('YYYY-MM-DD'), endDateKey: thisStart.format('YYYY-MM-DD') };
+    return { 
+      startDateKey: prev.format('YYYY-MM-DD'), 
+      endDateKey: thisStart.format('YYYY-MM-DD') 
+    };
   }
 }
+
+// Helper to check if a timestamp is in the current logical period
+export const isInCurrentPeriod = (timestamp: string | Date, rolloverDay: number, rolloverHour: number = 0) => {
+  const { startDateKey, endDateKey } = currentPeriodCph(rolloverDay, rolloverHour);
+  const logicalDate = logicalDateCph(timestamp, rolloverHour);
+  return logicalDate >= startDateKey && logicalDate < endDateKey;
+};

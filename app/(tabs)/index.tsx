@@ -11,6 +11,8 @@ import {
 import { Play, Calendar, AlertCircle } from "@/components/icons";
 import { useTimeTracking } from "@/providers/TimeTrackingProvider";
 import { useSettings } from "@/providers/SettingsProvider";
+import { colors } from "@/constants/colors";
+import { t } from "@/constants/strings";
 
 export default function HomeScreen() {
   const { onStamp } = useTimeTracking();
@@ -41,15 +43,15 @@ export default function HomeScreen() {
       {/* Timesheet Period Banner */}
       <View style={styles.periodBanner}>
         <View style={styles.periodHeader}>
-          <Calendar size={20} color="#6B7280" />
-          <Text style={styles.periodLabel}>Current Timesheet Period</Text>
+          <Calendar size={20} color={colors.textMuted} />
+          <Text style={styles.periodLabel}>{t.currentTimesheetPeriod}</Text>
         </View>
         <Text style={styles.periodDates}>
           {currentPeriod?.start || "--"} → {currentPeriod?.end || "--"}
         </Text>
         <View style={styles.rolloverBadge}>
           <Text style={styles.rolloverText}>
-            Rollover on day {settings.rollover_day_utc} (Copenhagen)
+            {t.rolloverOnDay} {settings.rollover_day_utc} (Copenhagen)
           </Text>
         </View>
       </View>
@@ -57,9 +59,9 @@ export default function HomeScreen() {
       {/* Rollover Day Info Banner */}
       {isRolloverDay && (
         <View style={styles.infoBanner}>
-          <AlertCircle size={16} color="#3B82F6" />
+          <AlertCircle size={16} color={colors.info} />
           <Text style={styles.infoText}>
-            Rollover happens at 00:00 Copenhagen time tonight
+            {t.rolloverHappensTonight}
           </Text>
         </View>
       )}
@@ -67,7 +69,7 @@ export default function HomeScreen() {
       {/* Stamp Button */}
       <View style={styles.stampSection}>
         <Text style={styles.stampLabel}>
-          Tap to record a time stamp
+          {t.tapToRecord}
         </Text>
         <TouchableOpacity
           style={[
@@ -79,17 +81,16 @@ export default function HomeScreen() {
           activeOpacity={0.8}
         >
           {isStamping ? (
-            <ActivityIndicator size="large" color="#FFFFFF" />
+            <ActivityIndicator size="large" color={colors.onPrimary} />
           ) : (
             <>
-              <Play size={32} color="#FFFFFF" fill="#FFFFFF" />
-              <Text style={styles.buttonText}>STAMP</Text>
+              <Play size={32} color={colors.onPrimary} fill={colors.onPrimary} />
+              <Text style={styles.buttonText}>{t.stamp}</Text>
             </>
           )}
         </TouchableOpacity>
         <Text style={styles.stampDescription}>
-          First stamp starts your day, second stamp ends it.
-          Additional stamps update the end time.
+          {t.stampDescription}
         </Text>
       </View>
     </ScrollView>
@@ -99,18 +100,18 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: colors.background,
   },
   contentContainer: {
     padding: 20,
   },
   periodBanner: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.backgroundSecondary,
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: colors.border,
   },
   periodHeader: {
     flexDirection: "row",
@@ -120,17 +121,17 @@ const styles = StyleSheet.create({
   },
   periodLabel: {
     fontSize: 14,
-    color: "#6B7280",
+    color: colors.textMuted,
     fontWeight: "500",
   },
   periodDates: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#111827",
+    color: colors.text,
     marginBottom: 12,
   },
   rolloverBadge: {
-    backgroundColor: "#EEF2FF",
+    backgroundColor: colors.backgroundTertiary,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 6,
@@ -138,11 +139,11 @@ const styles = StyleSheet.create({
   },
   rolloverText: {
     fontSize: 12,
-    color: "#4F46E5",
+    color: colors.primary,
     fontWeight: "500",
   },
   infoBanner: {
-    backgroundColor: "#EFF6FF",
+    backgroundColor: colors.backgroundTertiary,
     borderRadius: 8,
     padding: 12,
     flexDirection: "row",
@@ -150,11 +151,11 @@ const styles = StyleSheet.create({
     gap: 8,
     marginBottom: 24,
     borderWidth: 1,
-    borderColor: "#BFDBFE",
+    borderColor: colors.borderSecondary,
   },
   infoText: {
     fontSize: 14,
-    color: "#1E40AF",
+    color: colors.info,
     flex: 1,
   },
   stampSection: {
@@ -163,7 +164,7 @@ const styles = StyleSheet.create({
   },
   stampLabel: {
     fontSize: 16,
-    color: "#6B7280",
+    color: colors.textMuted,
     marginBottom: 20,
     textAlign: "center",
   },
@@ -181,11 +182,11 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
-    backgroundColor: "#4F46E5",
+    backgroundColor: colors.primary,
   },
   stampDescription: {
     fontSize: 14,
-    color: "#6B7280",
+    color: colors.textMuted,
     textAlign: "center",
     lineHeight: 20,
     paddingHorizontal: 20,
@@ -194,7 +195,7 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   buttonText: {
-    color: "#FFFFFF",
+    color: colors.onPrimary,
     fontSize: 20,
     fontWeight: "700",
     letterSpacing: 1,
@@ -205,6 +206,6 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 14,
-    color: "#6B7280",
+    color: colors.textMuted,
   },
 });

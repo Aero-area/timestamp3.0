@@ -9,16 +9,18 @@ import {
 import { useDayEntries } from "@/providers/DayEntriesProvider";
 import { hhmmCph } from "@/lib/time";
 import type { DayEntry } from "@/types";
+import { colors } from "@/constants/colors";
+import { t } from "@/constants/strings";
 
 export default function EntriesScreen() {
   const { dayEntries, isLoading } = useDayEntries();
 
   const renderTableHeader = () => (
     <View style={styles.tableHeader}>
-      <Text style={[styles.headerCell, styles.dateColumn]}>Date (CPH)</Text>
-      <Text style={[styles.headerCell, styles.timeColumn]}>Start</Text>
-      <Text style={[styles.headerCell, styles.timeColumn]}>End</Text>
-      <Text style={[styles.headerCell, styles.totalColumn]}>Total</Text>
+      <Text style={[styles.headerCell, styles.dateColumn]}>{t.date} (CPH)</Text>
+      <Text style={[styles.headerCell, styles.timeColumn]}>{t.start}</Text>
+      <Text style={[styles.headerCell, styles.timeColumn]}>{t.end}</Text>
+      <Text style={[styles.headerCell, styles.totalColumn]}>{t.total}</Text>
     </View>
   );
 
@@ -39,7 +41,7 @@ export default function EntriesScreen() {
 
   const renderEmptyState = () => (
     <View style={styles.emptyContainer}>
-      <Text style={styles.emptyText}>No entries in this period yet.</Text>
+      <Text style={styles.emptyText}>{t.noEntriesInPeriod}</Text>
     </View>
   );
 
@@ -47,7 +49,7 @@ export default function EntriesScreen() {
     <View style={styles.container}>
       {isLoading ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#4F46E5" />
+          <ActivityIndicator size="large" color={colors.primary} />
         </View>
       ) : dayEntries.length === 0 ? (
         renderEmptyState()
@@ -66,7 +68,7 @@ export default function EntriesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: colors.background,
   },
   loadingContainer: {
     flex: 1,
@@ -81,48 +83,48 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    color: "#9CA3AF",
+    color: colors.textMuted,
     textAlign: "center",
   },
   tableContainer: {
     flex: 1,
   },
   table: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.backgroundSecondary,
     margin: 16,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: colors.border,
     overflow: "hidden",
   },
   tableHeader: {
     flexDirection: "row",
-    backgroundColor: "#F3F4F6",
+    backgroundColor: colors.backgroundTertiary,
     borderBottomWidth: 2,
-    borderBottomColor: "#E5E7EB",
+    borderBottomColor: colors.border,
   },
   tableRow: {
     flexDirection: "row",
     borderBottomWidth: 1,
-    borderBottomColor: "#F3F4F6",
+    borderBottomColor: colors.backgroundTertiary,
   },
   evenRow: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.backgroundSecondary,
   },
   oddRow: {
-    backgroundColor: "#F9FAFB",
+    backgroundColor: colors.background,
   },
   headerCell: {
     padding: 12,
     fontSize: 14,
     fontWeight: "600",
-    color: "#374151",
+    color: colors.textSecondary,
     textAlign: "center",
   },
   cell: {
     padding: 12,
     fontSize: 14,
-    color: "#111827",
+    color: colors.text,
     textAlign: "center",
     fontVariant: ["tabular-nums"],
   },

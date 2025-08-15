@@ -16,7 +16,10 @@ export interface DayEntry {
 
 export interface Settings {
   rollover_day_utc: number;
+  rollover_hour: number; // Hour of day for rollover (0-23)
   rounding_rule: "none" | "5" | "10" | "15";
+  language: 'da' | 'en'; // Danish or English
+  themePrimary: string; // Hex color for primary theme
 }
 
 export interface EntriesResponse {

@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
+  TextInput,
 } from "react-native";
 import { Save, Clock, RotateCcw, Check, LogOut, Database } from "@/components/icons";
 import { useSettings } from "@/providers/SettingsProvider";
@@ -13,60 +14,72 @@ import { useToast } from "@/providers/ToastProvider";
 import { useAuth } from "@/providers/AuthProvider";
 import { useBackup } from "@/providers/BackupProvider";
 import { Picker } from "@react-native-picker/picker";
+import { colors } from "@/constants/colors";
+import { t } from "@/constants/strings";
 
 const ROUNDING_OPTIONS = [
-  { label: "No rounding", value: "none" },
-  { label: "5 minutes", value: "5" },
-  { label: "10 minutes", value: "10" },
-  { label: "15 minutes", value: "15" },
+  { label: t.noRounding, value: "none" },
+  { label: t.fiveMinutes, value: "5" },
+  { label: t.tenMinutes, value: "10" },
+  { label: t.fifteenMinutes, value: "15" },
 ];
 
 export default function SettingsScreen() {
-  const { settings, updateSettings, isUpdating } = useSettings();
+  const { settings, updateSettings, setRolloverHour, isUpdating } = useSettings();
   const { showToast } = useToast();
   const { signOut, user } = useAuth();
   const { performBackup, isBackingUp, backupEnabled, lastBackupAt } = useBackup();
   
   const [rolloverDay, setRolloverDay] = useState(settings.rollover_day_utc);
+  const [localRolloverHour, setLocalRolloverHour] = useState(settings.rollover_hour);
   const [roundingRule, setRoundingRule] = useState(settings.rounding_rule);
   const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
     const changed = 
       rolloverDay !== settings.rollover_day_utc ||
+      localRolloverHour !== settings.rollover_hour ||
       roundingRule !== settings.rounding_rule;
     setHasChanges(changed);
-  }, [rolloverDay, roundingRule, settings]);
+  }, [rolloverDay, localRolloverHour, roundingRule, settings]);
 
   const handleSave = async () => {
     // Validate rollover day
     if (rolloverDay < 1 || rolloverDay > 28) {
-      showToast("Rollover day must be between 1 and 28", "error");
+      showToast(t.rolloverDayRange, "error");
+      return;
+    }
+
+    // Validate rollover hour
+    if (localRolloverHour < 0 || localRolloverHour > 23) {
+      showToast(t.rolloverHourRange, "error");
       return;
     }
 
     try {
       await updateSettings({
         rollover_day_utc: rolloverDay,
+        rollover_hour: localRolloverHour,
         rounding_rule: roundingRule,
       });
-      showToast("Settings saved successfully", "success");
+      showToast(t.settingsSaved, "success");
     } catch (error: any) {
-      showToast(error.message || "Failed to save settings", "error");
+      showToast(error.message || t.failedToSave, "error");
     }
   };
 
   const handleReset = () => {
     setRolloverDay(settings.rollover_day_utc);
+    setLocalRolloverHour(settings.rollover_hour);
     setRoundingRule(settings.rounding_rule);
   };
 
   const handleLogout = async () => {
     try {
       await signOut();
-      showToast('Logged out successfully', 'success');
+      showToast(t.loggedOutSuccessfully, 'success');
     } catch {
-      showToast('Failed to log out', 'error');
+      showToast(t.failedToLogout, 'error');
     }
   };
 
@@ -80,12 +93,12 @@ export default function SettingsScreen() {
         {/* Rollover Day Setting */}
         <View style={styles.settingCard}>
           <View style={styles.settingHeader}>
-            <RotateCcw size={20} color="#4F46E5" />
-            <Text style={styles.settingTitle}>Timesheet Rollover Day</Text>
+            <RotateCcw size={20} color={colors.primary} />
+            <Text style={styles.settingTitle}>{t.timesheetRolloverDay}</Text>
           </View>
           
           <Text style={styles.settingDescription}>
-            Day of the month when timesheet periods reset (UTC timezone)
+            {t.rolloverDayDescription}
           </Text>
           
           <View style={styles.pickerContainer}>
@@ -97,7 +110,7 @@ export default function SettingsScreen() {
               {Array.from({ length: 28 }, (_, i) => i + 1).map((day) => (
                 <Picker.Item
                   key={day}
-                  label={`Day ${day}`}
+                  label={t.dayOfMonth.replace('{day}', day.toString())}
                   value={day}
                 />
               ))}
@@ -106,7 +119,41 @@ export default function SettingsScreen() {
           
           <View style={styles.infoBox}>
             <Text style={styles.infoText}>
-              Current setting: Day {rolloverDay} of each month
+              {t.currentSetting.replace('{day}', rolloverDay.toString())}
+            </Text>
+          </View>
+        </View>
+
+        {/* Rollover Hour Setting */}
+        <View style={styles.settingCard}>
+          <View style={styles.settingHeader}>
+            <Clock size={20} color={colors.primary} />
+            <Text style={styles.settingTitle}>{t.rolloverHour}</Text>
+          </View>
+          
+          <Text style={styles.settingDescription}>
+            {t.rolloverHourDescription}
+          </Text>
+          
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>{t.rolloverHour}</Text>
+            <TextInput
+              style={styles.hourInput}
+              value={localRolloverHour.toString()}
+              onChangeText={(text) => {
+                const hour = parseInt(text) || 0;
+                setLocalRolloverHour(hour);
+              }}
+              keyboardType="numeric"
+              placeholder="0-23"
+              placeholderTextColor={colors.textMuted}
+              maxLength={2}
+            />
+          </View>
+          
+          <View style={styles.infoBox}>
+            <Text style={styles.infoText}>
+              {t.rolloverHourHelp}
             </Text>
           </View>
         </View>
@@ -114,12 +161,12 @@ export default function SettingsScreen() {
         {/* Rounding Rule Setting */}
         <View style={styles.settingCard}>
           <View style={styles.settingHeader}>
-            <Clock size={20} color="#4F46E5" />
-            <Text style={styles.settingTitle}>Time Rounding Rule</Text>
+            <Clock size={20} color={colors.primary} />
+            <Text style={styles.settingTitle}>{t.timeRoundingRule}</Text>
           </View>
           
           <Text style={styles.settingDescription}>
-            Automatically round time entries to the nearest interval
+            {t.roundingDescription}
           </Text>
           
           <View style={styles.pickerContainer}>
@@ -140,9 +187,7 @@ export default function SettingsScreen() {
           
           <View style={styles.infoBox}>
             <Text style={styles.infoText}>
-              {roundingRule === "none"
-                ? "Time entries will not be rounded"
-                : `Time will be rounded to nearest ${roundingRule} minutes`}
+              {t.roundingInfo[roundingRule as keyof typeof t.roundingInfo]}
             </Text>
           </View>
         </View>
@@ -158,7 +203,7 @@ export default function SettingsScreen() {
               styles.resetButtonText,
               !hasChanges && styles.disabledText
             ]}>
-              Reset Changes
+              {t.reset}
             </Text>
           </TouchableOpacity>
           
@@ -171,16 +216,16 @@ export default function SettingsScreen() {
             disabled={!hasChanges || isUpdating}
           >
             {isUpdating ? (
-              <ActivityIndicator size="small" color="#FFFFFF" />
+              <ActivityIndicator size="small" color={colors.onPrimary} />
             ) : (
               <>
                 {hasChanges ? (
-                  <Save size={18} color="#FFFFFF" />
+                  <Save size={18} color={colors.onPrimary} />
                 ) : (
-                  <Check size={18} color="#FFFFFF" />
+                  <Check size={18} color={colors.onPrimary} />
                 )}
                 <Text style={styles.saveButtonText}>
-                  {hasChanges ? "Save Changes" : "Saved"}
+                  {hasChanges ? t.save : t.saved}
                 </Text>
               </>
             )}
@@ -191,14 +236,14 @@ export default function SettingsScreen() {
         {backupEnabled && (
           <View style={styles.settingCard}>
             <View style={styles.settingHeader}>
-              <Database size={20} color="#059669" />
-              <Text style={styles.settingTitle}>Data Backup</Text>
+              <Database size={20} color={colors.success} />
+              <Text style={styles.settingTitle}>{t.dataBackup}</Text>
             </View>
             
             <Text style={styles.settingDescription}>
               {lastBackupAt 
-                ? `Last backup: ${new Date(lastBackupAt).toLocaleDateString()} at ${new Date(lastBackupAt).toLocaleTimeString()}`
-                : 'No backup yet'}
+                ? `${t.lastBackup}: ${new Date(lastBackupAt).toLocaleDateString()} at ${new Date(lastBackupAt).toLocaleTimeString()}`
+                : t.noBackupYet}
             </Text>
             
             <TouchableOpacity
@@ -207,12 +252,12 @@ export default function SettingsScreen() {
               disabled={isBackingUp}
             >
               {isBackingUp ? (
-                <ActivityIndicator size="small" color="#059669" />
+                <ActivityIndicator size="small" color={colors.success} />
               ) : (
-                <Database size={18} color="#059669" />
+                <Database size={18} color={colors.success} />
               )}
               <Text style={styles.backupButtonText}>
-                {isBackingUp ? 'Backing up...' : 'Backup Now'}
+                {isBackingUp ? t.backingUp : t.backupNow}
               </Text>
             </TouchableOpacity>
           </View>
@@ -221,34 +266,34 @@ export default function SettingsScreen() {
         {/* Account Section */}
         <View style={styles.settingCard}>
           <View style={styles.settingHeader}>
-            <LogOut size={20} color="#DC2626" />
-            <Text style={styles.settingTitle}>Account</Text>
+            <LogOut size={20} color={colors.error} />
+            <Text style={styles.settingTitle}>{t.account}</Text>
           </View>
           
           <Text style={styles.settingDescription}>
-            Signed in as: {user?.email}
+            {t.signedInAs}: {user?.email}
           </Text>
           
           <TouchableOpacity
             style={styles.logoutButton}
             onPress={handleLogout}
           >
-            <LogOut size={18} color="#DC2626" />
-            <Text style={styles.logoutButtonText}>Sign Out</Text>
+            <LogOut size={18} color={colors.error} />
+            <Text style={styles.logoutButtonText}>{t.signOut}</Text>
           </TouchableOpacity>
         </View>
 
         {/* Additional Info */}
         <View style={styles.helpCard}>
-          <Text style={styles.helpTitle}>About Settings</Text>
+          <Text style={styles.helpTitle}>{t.aboutSettings}</Text>
           <Text style={styles.helpText}>
-            • Rollover day determines when your timesheet period resets each month
+            • {t.rolloverDayHelp}
           </Text>
           <Text style={styles.helpText}>
-            • Rounding rules apply to all time entries when calculating totals
+            • {t.roundingRulesHelp}
           </Text>
           <Text style={styles.helpText}>
-            • All times are processed in UTC to ensure consistency
+            • {t.utcConsistency}
           </Text>
         </View>
       </View>
@@ -259,18 +304,18 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: colors.background,
   },
   content: {
     padding: 20,
   },
   settingCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.backgroundSecondary,
     borderRadius: 12,
     padding: 20,
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: colors.border,
   },
   settingHeader: {
     flexDirection: "row",
@@ -281,31 +326,51 @@ const styles = StyleSheet.create({
   settingTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#111827",
+    color: colors.text,
   },
   settingDescription: {
     fontSize: 14,
-    color: "#6B7280",
+    color: colors.textMuted,
     marginBottom: 16,
   },
   pickerContainer: {
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: colors.border,
     borderRadius: 8,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: colors.backgroundTertiary,
     marginBottom: 12,
   },
   picker: {
     height: 50,
   },
+  inputContainer: {
+    marginBottom: 12,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: colors.textSecondary,
+    marginBottom: 8,
+  },
+  hourInput: {
+    height: 44,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    fontSize: 16,
+    backgroundColor: colors.backgroundSecondary,
+    color: colors.text,
+    textAlign: "center",
+  },
   infoBox: {
-    backgroundColor: "#EEF2FF",
+    backgroundColor: colors.backgroundTertiary,
     padding: 12,
     borderRadius: 8,
   },
   infoText: {
     fontSize: 13,
-    color: "#4F46E5",
+    color: colors.primary,
   },
   buttonContainer: {
     flexDirection: "row",
@@ -317,50 +382,50 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
+    borderColor: colors.border,
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.backgroundSecondary,
   },
   resetButtonText: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#6B7280",
+    color: colors.textMuted,
   },
   disabledText: {
-    color: "#D1D5DB",
+    color: colors.disabled,
   },
   saveButton: {
     flex: 1,
     paddingVertical: 14,
     borderRadius: 8,
-    backgroundColor: "#4F46E5",
+    backgroundColor: colors.primary,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 6,
   },
   saveButtonDisabled: {
-    backgroundColor: "#9CA3AF",
+    backgroundColor: colors.disabled,
   },
   saveButtonText: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#FFFFFF",
+    color: colors.onPrimary,
   },
   helpCard: {
-    backgroundColor: "#F3F4F6",
+    backgroundColor: colors.backgroundTertiary,
     borderRadius: 8,
     padding: 16,
   },
   helpTitle: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#374151",
+    color: colors.textSecondary,
     marginBottom: 12,
   },
   helpText: {
     fontSize: 13,
-    color: "#6B7280",
+    color: colors.textMuted,
     marginBottom: 8,
     lineHeight: 18,
   },
@@ -373,13 +438,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#FCA5A5',
-    backgroundColor: '#FEF2F2',
+    borderColor: colors.error,
+    backgroundColor: colors.backgroundSecondary,
   },
   logoutButtonText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#DC2626',
+    color: colors.error,
   },
   backupButton: {
     flexDirection: 'row',
@@ -390,12 +455,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#A7F3D0',
-    backgroundColor: '#ECFDF5',
+    borderColor: colors.success,
+    backgroundColor: colors.backgroundSecondary,
   },
   backupButtonText: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#059669',
+    color: colors.success,
   },
 });

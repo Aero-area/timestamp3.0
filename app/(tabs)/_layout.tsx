@@ -1,40 +1,42 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
 import { Calendar, FileSpreadsheet, BarChart3, Settings as SettingsIcon } from '@/components/icons';
+import { colors } from '@/constants/colors';
+import { t } from '@/constants/strings';
 
 export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#6C63FF',
+        tabBarActiveTintColor: colors.primary,
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
+          title: t.home,
           tabBarIcon: ({ size, color }) => <Calendar size={size} color={color} />,
         }}
       />
       <Tabs.Screen
         name="entries"
         options={{
-          title: 'Entries',
+          title: t.entries,
           tabBarIcon: ({ size, color }) => <FileSpreadsheet size={size} color={color} />,
         }}
       />
       <Tabs.Screen
         name="reports"
         options={{
-          title: 'Reports',
+          title: t.reports,
           tabBarIcon: ({ size, color }) => <BarChart3 size={size} color={color} />,
         }}
       />
       <Tabs.Screen
         name="settings"
         options={{
-          title: 'Settings',
+          title: t.settings,
           tabBarIcon: ({ size, color }) => <SettingsIcon size={size} color={color} />,
         }}
       />

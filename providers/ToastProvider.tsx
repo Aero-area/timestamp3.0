@@ -7,6 +7,7 @@ import {
   Platform,
 } from "react-native";
 import { CheckCircle, XCircle, AlertCircle } from "@/components/icons";
+import { colors } from "@/constants/colors";
 
 type ToastType = "success" | "error" | "info";
 
@@ -72,33 +73,33 @@ function ToastItem({ toast }: { toast: Toast }) {
   const getIcon = () => {
     switch (toast.type) {
       case "success":
-        return <CheckCircle size={20} color="#10B981" />;
+        return <CheckCircle size={20} color={colors.success} />;
       case "error":
-        return <XCircle size={20} color="#EF4444" />;
+        return <XCircle size={20} color={colors.error} />;
       default:
-        return <AlertCircle size={20} color="#3B82F6" />;
+        return <AlertCircle size={20} color={colors.info} />;
     }
   };
 
   const getBackgroundColor = () => {
     switch (toast.type) {
       case "success":
-        return "#ECFDF5";
+        return colors.backgroundSecondary;
       case "error":
-        return "#FEF2F2";
+        return colors.backgroundSecondary;
       default:
-        return "#EFF6FF";
+        return colors.backgroundSecondary;
     }
   };
 
   const getBorderColor = () => {
     switch (toast.type) {
       case "success":
-        return "#10B981";
+        return colors.success;
       case "error":
-        return "#EF4444";
+        return colors.error;
       default:
-        return "#3B82F6";
+        return colors.info;
     }
   };
 
@@ -152,6 +153,6 @@ const styles = StyleSheet.create({
   toastText: {
     flex: 1,
     fontSize: 14,
-    color: "#111827",
+    color: colors.text,
   },
 });

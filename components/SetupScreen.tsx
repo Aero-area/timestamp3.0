@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { RefreshCw } from '@/components/icons';
+import { colors } from '@/constants/colors';
 
 interface SetupScreenProps {
   missing?: string[];
@@ -71,7 +72,7 @@ export default function SetupScreen({ missing = [] }: SetupScreenProps) {
         </View>
         
         <TouchableOpacity style={styles.reloadButton} onPress={handleReload}>
-          <RefreshCw size={20} color="#FFFFFF" style={styles.reloadIcon} />
+          <RefreshCw size={20} color={colors.onPrimary} style={styles.reloadIcon} />
           <Text style={styles.reloadButtonText}>Reload App</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -82,34 +83,34 @@ export default function SetupScreen({ missing = [] }: SetupScreenProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: colors.background,
   },
   content: {
     padding: 20,
   },
   header: {
     marginBottom: 30,
-    alignItems: 'center',
+    alignItems: "center",
   },
   title: {
     fontSize: 24,
-    fontWeight: '700',
-    color: '#111827',
+    fontWeight: "700",
+    color: colors.text,
     marginBottom: 8,
-    textAlign: 'center',
+    textAlign: "center",
   },
   subtitle: {
     fontSize: 16,
-    color: '#6B7280',
-    textAlign: 'center',
+    color: colors.textMuted,
+    textAlign: "center",
     lineHeight: 24,
   },
   section: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.backgroundSecondary,
     borderRadius: 12,
     padding: 20,
     marginBottom: 20,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 3,
@@ -117,56 +118,56 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#111827',
+    fontWeight: "600",
+    color: colors.text,
     marginBottom: 16,
   },
   variable: {
     marginBottom: 16,
     paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: colors.border,
   },
   variableName: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#4F46E5',
-    fontFamily: 'monospace',
+    fontWeight: "600",
+    color: colors.primary,
+    fontFamily: "monospace",
     marginBottom: 4,
   },
   variableExample: {
     fontSize: 12,
-    color: '#6B7280',
-    fontFamily: 'monospace',
+    color: colors.textMuted,
+    fontFamily: "monospace",
   },
   instructions: {
-    backgroundColor: '#FEF3C7',
+    backgroundColor: colors.backgroundTertiary,
     borderRadius: 12,
     padding: 20,
     borderLeftWidth: 4,
-    borderLeftColor: '#F59E0B',
+    borderLeftColor: colors.warning,
   },
   instructionsTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#92400E',
+    fontWeight: "600",
+    color: colors.warning,
     marginBottom: 12,
   },
   instructionText: {
     fontSize: 14,
-    color: '#92400E',
+    color: colors.warning,
     marginBottom: 8,
     lineHeight: 20,
   },
   reloadButton: {
-    backgroundColor: '#4F46E5',
+    backgroundColor: colors.primary,
     borderRadius: 12,
     padding: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     marginTop: 20,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -176,8 +177,8 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   reloadButtonText: {
-    color: '#FFFFFF',
+    color: colors.onPrimary,
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });
