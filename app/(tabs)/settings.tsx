@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import {
   StyleSheet,
   Text,
@@ -25,23 +25,22 @@ const ROUNDING_OPTIONS = [
 ];
 
 export default function SettingsScreen() {
-  const { settings, updateSettings, setRolloverHour, isUpdating } = useSettings();
+  const { 
+    rolloverDay, 
+    rolloverHour, 
+    roundingRule, 
+    hasUnsavedChanges,
+    setRolloverDay, 
+    setRolloverHour, 
+    setRoundingRule, 
+    updateSettings,
+    saveSettings,
+    loaded 
+  } = useSettings();
+  
   const { showToast } = useToast();
   const { signOut, user } = useAuth();
   const { performBackup, isBackingUp, backupEnabled, lastBackupAt } = useBackup();
-  
-  const [rolloverDay, setRolloverDay] = useState(settings.rollover_day_utc);
-  const [localRolloverHour, setLocalRolloverHour] = useState(settings.rollover_hour);
-  const [roundingRule, setRoundingRule] = useState(settings.rounding_rule);
-  const [hasChanges, setHasChanges] = useState(false);
-
-  useEffect(() => {
-    const changed = 
-      rolloverDay !== settings.rollover_day_utc ||
-      localRolloverHour !== settings.rollover_hour ||
-      roundingRule !== settings.rounding_rule;
-    setHasChanges(changed);
-  }, [rolloverDay, localRolloverHour, roundingRule, settings]);
 
   const handleSave = async () => {
     // Validate rollover day
@@ -51,26 +50,34 @@ export default function SettingsScreen() {
     }
 
     // Validate rollover hour
-    if (localRolloverHour < 0 || localRolloverHour > 23) {
+    if (rolloverHour < 0 || rolloverHour > 23) {
       showToast(t.rolloverHourRange, "error");
       return;
     }
 
     try {
-      await updateSettings({
+      // Update settings with current form values
+      updateSettings({
         rollover_day_utc: rolloverDay,
-        rollover_hour: localRolloverHour,
+        rollover_hour: rolloverHour,
         rounding_rule: roundingRule,
       });
-      showToast(t.settingsSaved, "success");
+      
+      // Save to both Supabase and AsyncStorage
+      await saveSettings();
+      
+      // Show success toast in Danish
+      showToast("Gemt", "success");
     } catch (error: any) {
       showToast(error.message || t.failedToSave, "error");
     }
   };
 
   const handleReset = () => {
+    // Reset to last saved values from context
+    const { settings } = useSettings();
     setRolloverDay(settings.rollover_day_utc);
-    setLocalRolloverHour(settings.rollover_hour);
+    setRolloverHour(settings.rollover_hour);
     setRoundingRule(settings.rounding_rule);
   };
 
@@ -86,6 +93,16 @@ export default function SettingsScreen() {
   const handleManualBackup = async () => {
     await performBackup(true);
   };
+
+  // Show loading state while settings are being loaded
+  if (!loaded) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={styles.loadingText}>{t.loading}</Text>
+      </View>
+    );
+  }
 
   return (
     <ScrollView style={styles.container}>
@@ -139,10 +156,10 @@ export default function SettingsScreen() {
             <Text style={styles.inputLabel}>{t.rolloverHour}</Text>
             <TextInput
               style={styles.hourInput}
-              value={localRolloverHour.toString()}
+              value={rolloverHour.toString()}
               onChangeText={(text) => {
                 const hour = parseInt(text) || 0;
-                setLocalRolloverHour(hour);
+                setRolloverHour(hour);
               }}
               keyboardType="numeric"
               placeholder="0-23"
@@ -197,11 +214,11 @@ export default function SettingsScreen() {
           <TouchableOpacity
             style={styles.resetButton}
             onPress={handleReset}
-            disabled={!hasChanges}
+            disabled={!hasUnsavedChanges}
           >
             <Text style={[
               styles.resetButtonText,
-              !hasChanges && styles.disabledText
+              !hasUnsavedChanges && styles.disabledText
             ]}>
               {t.reset}
             </Text>
@@ -210,23 +227,20 @@ export default function SettingsScreen() {
           <TouchableOpacity
             style={[
               styles.saveButton,
-              !hasChanges && styles.saveButtonDisabled
+              !hasUnsavedChanges && styles.saveButtonDisabled
             ]}
             onPress={handleSave}
-            disabled={!hasChanges || isUpdating}
+            disabled={!hasUnsavedChanges}
           >
-            {isUpdating ? (
-              <ActivityIndicator size="small" color={colors.onPrimary} />
+            {hasUnsavedChanges ? (
+              <>
+                <Save size={18} color={colors.onPrimary} />
+                <Text style={styles.saveButtonText}>{t.save}</Text>
+              </>
             ) : (
               <>
-                {hasChanges ? (
-                  <Save size={18} color={colors.onPrimary} />
-                ) : (
-                  <Check size={18} color={colors.onPrimary} />
-                )}
-                <Text style={styles.saveButtonText}>
-                  {hasChanges ? t.save : t.saved}
-                </Text>
+                <Check size={18} color={colors.onPrimary} />
+                <Text style={styles.saveButtonText}>{t.saved}</Text>
               </>
             )}
           </TouchableOpacity>
@@ -308,6 +322,17 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 20,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: colors.background,
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: colors.textMuted,
   },
   settingCard: {
     backgroundColor: colors.backgroundSecondary,

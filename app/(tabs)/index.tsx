@@ -16,7 +16,7 @@ import { t } from "@/constants/strings";
 
 export default function HomeScreen() {
   const { onStamp } = useTimeTracking();
-  const { settings, currentPeriod, isRolloverDay } = useSettings();
+  const { settings, currentPeriod, isRolloverDay, loaded } = useSettings();
   const [isStamping, setIsStamping] = useState(false);
 
   const handleStamp = async () => {
@@ -31,6 +31,16 @@ export default function HomeScreen() {
   const refreshStatus = () => {
     // No-op for now since we don't have server polling
   };
+
+  // Show loading state while settings are being loaded
+  if (!loaded) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={styles.loadingText}>{t.loading}</Text>
+      </View>
+    );
+  }
 
   return (
     <ScrollView 
@@ -104,6 +114,17 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     padding: 20,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: colors.background,
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: colors.textMuted,
   },
   periodBanner: {
     backgroundColor: colors.backgroundSecondary,

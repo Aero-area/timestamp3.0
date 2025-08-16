@@ -60,7 +60,7 @@ export const [DayEntriesProvider, useDayEntries] = createContextHook(() => {
     }
 
     const timestamp = nowUtc.toISOString();
-    // Use logical date based on rollover hour
+    // Use logical date based on rollover hour from settings
     const logicalDate = logicalDateCph(nowUtc, settings.rollover_hour);
 
     try {

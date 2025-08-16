@@ -14,7 +14,7 @@ export const toUTCISO = (d: Date | string | number = new Date()) => dayjs(d).utc
 export const dayKeyCph = (d: Date | string) => toCph(d).format('YYYY-MM-DD');
 
 // NEW: Logical date calculation based on rollover hour
-export const logicalDateCph = (d: Date | string, rolloverHour: number = 0) => {
+export const logicalDateCph = (d: Date | string, rolloverHour: number) => {
   const date = toCph(d);
   const hour = date.hour();
   
@@ -54,7 +54,16 @@ export function formatDurationHMS(seconds: number) {
 export const getTodayCphKey = () => nowCph().format('YYYY-MM-DD');
 
 // Current rollover window computed in Copenhagen; returns day-key strings [start, end)
-export function currentPeriodCph(rolloverDay: number, rolloverHour: number = 0) {
+// REQUIRES: rolloverDay and rolloverHour from settings context
+export function currentPeriodCph(rolloverDay: number, rolloverHour: number) {
+  if (rolloverDay < 1 || rolloverDay > 28) {
+    throw new Error(`Invalid rollover day: ${rolloverDay}. Must be between 1 and 28.`);
+  }
+  
+  if (rolloverHour < 0 || rolloverHour > 23) {
+    throw new Error(`Invalid rollover hour: ${rolloverHour}. Must be between 0 and 23.`);
+  }
+  
   const base = dayjs().tz(TZ);
   const thisStart = base.date(rolloverDay).hour(rolloverHour).minute(0).second(0).millisecond(0);
   
@@ -74,8 +83,16 @@ export function currentPeriodCph(rolloverDay: number, rolloverHour: number = 0) 
 }
 
 // Helper to check if a timestamp is in the current logical period
-export const isInCurrentPeriod = (timestamp: string | Date, rolloverDay: number, rolloverHour: number = 0) => {
+// REQUIRES: rolloverDay and rolloverHour from settings context
+export const isInCurrentPeriod = (timestamp: string | Date, rolloverDay: number, rolloverHour: number) => {
   const { startDateKey, endDateKey } = currentPeriodCph(rolloverDay, rolloverHour);
   const logicalDate = logicalDateCph(timestamp, rolloverHour);
   return logicalDate >= startDateKey && logicalDate < endDateKey;
 };
+
+// Legacy function with defaults for backward compatibility (deprecated)
+// @deprecated Use currentPeriodCph(rolloverDay, rolloverHour) instead
+export function currentPeriodCphLegacy(rolloverDay: number = 1, rolloverHour: number = 0) {
+  console.warn('currentPeriodCphLegacy is deprecated. Use currentPeriodCph(rolloverDay, rolloverHour) with explicit values from settings context.');
+  return currentPeriodCph(rolloverDay, rolloverHour);
+}
