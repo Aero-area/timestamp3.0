@@ -48,6 +48,33 @@ export const [DayEntriesProvider, useDayEntries] = createContextHook(() => {
     }
   }, [user, currentPeriod, setOnline, setOffline, showToast]);
 
+  // Get entries for a specific date range (for reports)
+  const getEntriesBetween = useCallback(async (startDate: string, endDate: string): Promise<DayEntry[]> => {
+    const supabase = getSupabase();
+    if (!supabase || !user) {
+      throw new Error('Supabase not initialized or user not authenticated');
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('day_entries')
+        .select('*')
+        .eq('user_id', user.id)
+        .gte('date_utc', startDate)
+        .lte('date_utc', endDate)
+        .order('date_utc', { ascending: true });
+
+      if (error) {
+        throw error;
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('Failed to fetch entries between dates:', error);
+      throw error;
+    }
+  }, [user]);
+
   useEffect(() => {
     loadEntries();
   }, [loadEntries]);
@@ -188,5 +215,6 @@ export const [DayEntriesProvider, useDayEntries] = createContextHook(() => {
     onStamp,
     isLoading,
     refreshEntries: loadEntries,
-  }), [dayEntries, onStamp, isLoading, loadEntries]);
+    getEntriesBetween,
+  }), [dayEntries, onStamp, isLoading, loadEntries, getEntriesBetween]);
 });

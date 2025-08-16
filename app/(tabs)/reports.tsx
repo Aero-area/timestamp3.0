@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -7,55 +7,70 @@ import {
   TextInput,
   ActivityIndicator,
   Platform,
-  Linking,
 } from "react-native";
 import { Download, FileText, FileSpreadsheet, Calendar } from "@/components/icons";
 import { useToast } from "@/providers/ToastProvider";
-import { api } from "@/utils/api";
+import { useDayEntries } from "@/providers/DayEntriesProvider";
+import { useSettings } from "@/providers/SettingsProvider";
+import { exportCsv, exportPdf } from "@/lib/export";
 import { colors } from "@/constants/colors";
 import { t } from "@/constants/strings";
 
 export default function ReportsScreen() {
   const { showToast } = useToast();
+  const { getEntriesBetween } = useDayEntries();
+  const { settings } = useSettings();
+  
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [isExporting, setIsExporting] = useState(false);
+  const [entries, setEntries] = useState<any[]>([]);
+  const [isLoadingEntries, setIsLoadingEntries] = useState(false);
 
-  const validateDates = () => {
-    if (!dateFrom || !dateTo) {
-      showToast(t.pleaseSelectDates, "error");
-      return false;
+  // Validate date range
+  const isValidDateRange = dateFrom && dateTo && new Date(dateTo) >= new Date(dateFrom);
+
+  // Load entries when date range changes
+  useEffect(() => {
+    if (isValidDateRange) {
+      loadEntriesForRange();
     }
+  }, [dateFrom, dateTo]);
+
+  const loadEntriesForRange = async () => {
+    if (!isValidDateRange) return;
     
-    if (new Date(dateTo) < new Date(dateFrom)) {
-      showToast(t.endDateBeforeStart, "error");
-      return false;
+    setIsLoadingEntries(true);
+    try {
+      const fetchedEntries = await getEntriesBetween(dateFrom, dateTo);
+      setEntries(fetchedEntries);
+    } catch (error) {
+      console.error('Failed to load entries:', error);
+      showToast('Kunne ikke indlæse registreringer for valgt periode', 'error');
+    } finally {
+      setIsLoadingEntries(false);
     }
-    
-    return true;
   };
 
   const handleExportCSV = async () => {
-    if (!validateDates()) return;
+    if (!isValidDateRange || entries.length === 0) {
+      showToast('Vælg venligst en gyldig datoperiode med registreringer', 'error');
+      return;
+    }
     
     setIsExporting(true);
     try {
-      const url = await api.exportCSV(dateFrom, dateTo);
+      await exportCsv(entries, { start: dateFrom, end: dateTo }, {
+        language: settings.language,
+        rollover_day_utc: settings.rollover_day_utc,
+        rollover_hour: settings.rollover_hour,
+      });
       
-      if (Platform.OS === "web") {
-        // For web, create a download link
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `timesheet_${dateFrom}_${dateTo}.csv`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+      if (Platform.OS === 'web') {
+        showToast('CSV download startet', 'success');
       } else {
-        // For mobile, open the URL
-        await Linking.openURL(url);
+        showToast('CSV deling åbnet', 'success');
       }
-      
-      showToast(t.csvExportedSuccessfully, "success");
     } catch (error: any) {
       showToast(error.message || t.failedToExport, "error");
     } finally {
@@ -64,26 +79,24 @@ export default function ReportsScreen() {
   };
 
   const handleExportPDF = async () => {
-    if (!validateDates()) return;
+    if (!isValidDateRange || entries.length === 0) {
+      showToast('Vælg venligst en gyldig datoperiode med registreringer', 'error');
+      return;
+    }
     
     setIsExporting(true);
     try {
-      const url = await api.exportPDF(dateFrom, dateTo);
+      await exportPdf(entries, { start: dateFrom, end: dateTo }, {
+        language: settings.language,
+        rollover_day_utc: settings.rollover_day_utc,
+        rollover_hour: settings.rollover_hour,
+      });
       
-      if (Platform.OS === "web") {
-        // For web, create a download link
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `timesheet_${dateFrom}_${dateTo}.pdf`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+      if (Platform.OS === 'web') {
+        showToast('PDF print vindue åbnet', 'success');
       } else {
-        // For mobile, open the URL
-        await Linking.openURL(url);
+        showToast('PDF deling åbnet', 'success');
       }
-      
-      showToast(t.pdfExportedSuccessfully, "success");
     } catch (error: any) {
       showToast(error.message || t.failedToExport, "error");
     } finally {
@@ -113,7 +126,10 @@ export default function ReportsScreen() {
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>{t.fromDate}</Text>
               <TextInput
-                style={styles.dateInput}
+                style={[
+                  styles.dateInput,
+                  dateFrom && !isValidDateRange && styles.dateInputError
+                ]}
                 placeholder="YYYY-MM-DD"
                 value={dateFrom}
                 onChangeText={setDateFrom}
@@ -124,7 +140,10 @@ export default function ReportsScreen() {
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>{t.toDate}</Text>
               <TextInput
-                style={styles.dateInput}
+                style={[
+                  styles.dateInput,
+                  dateTo && !isValidDateRange && styles.dateInputError
+                ]}
                 placeholder="YYYY-MM-DD"
                 value={dateTo}
                 onChangeText={setDateTo}
@@ -139,6 +158,15 @@ export default function ReportsScreen() {
           >
             <Text style={styles.quickButtonText}>{t.last7Days}</Text>
           </TouchableOpacity>
+
+          {/* Date validation message */}
+          {dateFrom && dateTo && !isValidDateRange && (
+            <View style={styles.validationMessage}>
+              <Text style={styles.validationText}>
+                {t.endDateBeforeStart}
+              </Text>
+            </View>
+          )}
         </View>
 
         <View style={styles.exportSection}>
@@ -148,10 +176,10 @@ export default function ReportsScreen() {
             style={[
               styles.exportButton,
               styles.csvButton,
-              isExporting && styles.exportButtonDisabled
+              (!isValidDateRange || isExporting || isLoadingEntries) && styles.exportButtonDisabled
             ]}
             onPress={handleExportCSV}
-            disabled={isExporting}
+            disabled={!isValidDateRange || isExporting || isLoadingEntries}
           >
             {isExporting ? (
               <ActivityIndicator size="small" color={colors.onPrimary} />
@@ -173,10 +201,10 @@ export default function ReportsScreen() {
             style={[
               styles.exportButton,
               styles.pdfButton,
-              isExporting && styles.exportButtonDisabled
+              (!isValidDateRange || isExporting || isLoadingEntries) && styles.exportButtonDisabled
             ]}
             onPress={handleExportPDF}
-            disabled={isExporting}
+            disabled={!isValidDateRange || isExporting || isLoadingEntries}
           >
             {isExporting ? (
               <ActivityIndicator size="small" color={colors.onPrimary} />
@@ -195,15 +223,33 @@ export default function ReportsScreen() {
           </TouchableOpacity>
         </View>
 
+        {/* Preview section */}
         {(dateFrom && dateTo) && (
           <View style={styles.previewCard}>
             <Text style={styles.previewTitle}>{t.reportPreview}</Text>
             <Text style={styles.previewText}>
               {t.period}: {dateFrom} {t.to} {dateTo}
             </Text>
-            <Text style={styles.previewNote}>
-              {t.exportNote}
-            </Text>
+            
+            {isLoadingEntries ? (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="small" color={colors.primary} />
+                <Text style={styles.loadingText}>Indlæser registreringer...</Text>
+              </View>
+            ) : entries.length > 0 ? (
+              <View style={styles.entriesSummary}>
+                <Text style={styles.entriesCount}>
+                  {entries.length} registreringer fundet
+                </Text>
+                <Text style={styles.exportNote}>
+                  {t.exportNote}
+                </Text>
+              </View>
+            ) : (
+              <Text style={styles.noEntriesText}>
+                {t.noEntriesInPeriod}
+              </Text>
+            )}
           </View>
         )}
       </View>
@@ -260,6 +306,20 @@ const styles = StyleSheet.create({
     backgroundColor: colors.backgroundSecondary,
     color: colors.text,
   },
+  dateInputError: {
+    borderColor: colors.error,
+  },
+  validationMessage: {
+    backgroundColor: colors.backgroundTertiary,
+    padding: 12,
+    borderRadius: 8,
+    borderLeftWidth: 4,
+    borderLeftColor: colors.error,
+  },
+  validationText: {
+    fontSize: 14,
+    color: colors.error,
+  },
   quickButton: {
     backgroundColor: colors.backgroundTertiary,
     paddingVertical: 10,
@@ -289,7 +349,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   exportButtonDisabled: {
-    opacity: 0.7,
+    opacity: 0.5,
   },
   csvButton: {
     backgroundColor: colors.success,
@@ -325,10 +385,32 @@ const styles = StyleSheet.create({
   previewText: {
     fontSize: 14,
     color: colors.textMuted,
-    marginBottom: 4,
+    marginBottom: 12,
   },
-  previewNote: {
+  loadingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  loadingText: {
+    fontSize: 14,
+    color: colors.textMuted,
+  },
+  entriesSummary: {
+    gap: 4,
+  },
+  entriesCount: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: colors.primary,
+  },
+  exportNote: {
     fontSize: 12,
+    color: colors.textMuted,
+    fontStyle: "italic",
+  },
+  noEntriesText: {
+    fontSize: 14,
     color: colors.textMuted,
     fontStyle: "italic",
   },
