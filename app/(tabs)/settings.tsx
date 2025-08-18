@@ -26,6 +26,7 @@ const ROUNDING_OPTIONS = [
 
 export default function SettingsScreen() {
   const { 
+    settings, 
     rolloverDay, 
     rolloverHour, 
     roundingRule, 
@@ -74,8 +75,6 @@ export default function SettingsScreen() {
   };
 
   const handleReset = () => {
-    // Reset to last saved values from context
-    const { settings } = useSettings();
     setRolloverDay(settings.rollover_day_utc);
     setRolloverHour(settings.rollover_hour);
     setRoundingRule(settings.rounding_rule);

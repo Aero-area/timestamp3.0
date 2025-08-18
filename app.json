@@ -44,7 +44,6 @@
 
     "plugins": [
       ["expo-router", { "origin": "https://rork.com/" }],
-      "expo-web-browser"
     ],
 
     "experiments": { "typedRoutes": true }
