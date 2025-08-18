@@ -14,12 +14,11 @@ import { useDayEntries } from "@/providers/DayEntriesProvider";
 import { useSettings } from "@/providers/SettingsProvider";
 import { exportCsv, exportPdf } from "@/lib/export";
 import { colors } from "@/constants/colors";
-import { t } from "@/constants/strings";
 
 export default function ReportsScreen() {
   const { showToast } = useToast();
   const { getEntriesBetween } = useDayEntries();
-  const { settings } = useSettings();
+  const { settings, t } = useSettings();
   
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
@@ -46,7 +45,7 @@ export default function ReportsScreen() {
       setEntries(fetchedEntries);
     } catch (error) {
       console.error('Failed to load entries:', error);
-      showToast('Kunne ikke indlæse registreringer for valgt periode', 'error');
+      showToast(t('failedToLoadEntries'), 'error');
     } finally {
       setIsLoadingEntries(false);
     }
@@ -54,7 +53,7 @@ export default function ReportsScreen() {
 
   const handleExportCSV = async () => {
     if (!isValidDateRange || entries.length === 0) {
-      showToast('Vælg venligst en gyldig datoperiode med registreringer', 'error');
+      showToast(t('pleaseSelectValidDateRangeWithEntries'), 'error');
       return;
     }
     
@@ -67,12 +66,12 @@ export default function ReportsScreen() {
       });
       
       if (Platform.OS === 'web') {
-        showToast('CSV download startet', 'success');
+        showToast(t('csvDownloadStarted'), 'success');
       } else {
-        showToast('CSV deling åbnet', 'success');
+        showToast(t('csvShareOpened'), 'success');
       }
     } catch (error: any) {
-      showToast(error.message || t.failedToExport, "error");
+      showToast(error.message || t('failedToExport'), "error");
     } finally {
       setIsExporting(false);
     }
@@ -80,7 +79,7 @@ export default function ReportsScreen() {
 
   const handleExportPDF = async () => {
     if (!isValidDateRange || entries.length === 0) {
-      showToast('Vælg venligst en gyldig datoperiode med registreringer', 'error');
+      showToast(t('pleaseSelectValidDateRangeWithEntries'), 'error');
       return;
     }
     
@@ -93,12 +92,12 @@ export default function ReportsScreen() {
       });
       
       if (Platform.OS === 'web') {
-        showToast('PDF print vindue åbnet', 'success');
+        showToast(t('pdfPrintWindowOpened'), 'success');
       } else {
-        showToast('PDF deling åbnet', 'success');
+        showToast(t('pdfShareOpened'), 'success');
       }
     } catch (error: any) {
-      showToast(error.message || t.failedToExport, "error");
+      showToast(error.message || t('failedToExport'), "error");
     } finally {
       setIsExporting(false);
     }
@@ -119,12 +118,12 @@ export default function ReportsScreen() {
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <Calendar size={20} color={colors.primary} />
-            <Text style={styles.cardTitle}>{t.selectDateRange}</Text>
+            <Text style={styles.cardTitle}>{t('selectDateRange')}</Text>
           </View>
           
           <View style={styles.dateInputContainer}>
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>{t.fromDate}</Text>
+              <Text style={styles.inputLabel}>{t('fromDate')}</Text>
               <TextInput
                 style={[
                   styles.dateInput,
@@ -138,7 +137,7 @@ export default function ReportsScreen() {
             </View>
             
             <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>{t.toDate}</Text>
+              <Text style={styles.inputLabel}>{t('toDate')}</Text>
               <TextInput
                 style={[
                   styles.dateInput,
@@ -156,21 +155,21 @@ export default function ReportsScreen() {
             style={styles.quickButton}
             onPress={setLast7Days}
           >
-            <Text style={styles.quickButtonText}>{t.last7Days}</Text>
+            <Text style={styles.quickButtonText}>{t('last7Days')}</Text>
           </TouchableOpacity>
 
           {/* Date validation message */}
           {dateFrom && dateTo && !isValidDateRange && (
             <View style={styles.validationMessage}>
               <Text style={styles.validationText}>
-                {t.endDateBeforeStart}
+                {t('endDateBeforeStart')}
               </Text>
             </View>
           )}
         </View>
 
         <View style={styles.exportSection}>
-          <Text style={styles.exportTitle}>{t.exportOptions}</Text>
+          <Text style={styles.exportTitle}>{t('exportOptions')}</Text>
           
           <TouchableOpacity
             style={[
@@ -187,9 +186,9 @@ export default function ReportsScreen() {
               <>
                 <FileSpreadsheet size={24} color={colors.onPrimary} />
                 <View style={styles.exportButtonContent}>
-                  <Text style={styles.exportButtonTitle}>{t.exportCSV}</Text>
+                  <Text style={styles.exportButtonTitle}>{t('exportCSV')}</Text>
                   <Text style={styles.exportButtonSubtitle}>
-                    {t.csvDescription}
+                    {t('csvDescription')}
                   </Text>
                 </View>
                 <Download size={20} color={colors.onPrimary} />
@@ -212,9 +211,9 @@ export default function ReportsScreen() {
               <>
                 <FileText size={24} color={colors.onPrimary} />
                 <View style={styles.exportButtonContent}>
-                  <Text style={styles.exportButtonTitle}>{t.exportPDF}</Text>
+                  <Text style={styles.exportButtonTitle}>{t('exportPDF')}</Text>
                   <Text style={styles.exportButtonSubtitle}>
-                    {t.pdfDescription}
+                    {t('pdfDescription')}
                   </Text>
                 </View>
                 <Download size={20} color={colors.onPrimary} />
@@ -226,28 +225,28 @@ export default function ReportsScreen() {
         {/* Preview section */}
         {(dateFrom && dateTo) && (
           <View style={styles.previewCard}>
-            <Text style={styles.previewTitle}>{t.reportPreview}</Text>
+            <Text style={styles.previewTitle}>{t('reportPreview')}</Text>
             <Text style={styles.previewText}>
-              {t.period}: {dateFrom} {t.to} {dateTo}
+              {t('period')}: {dateFrom} {t('to')} {dateTo}
             </Text>
             
             {isLoadingEntries ? (
               <View style={styles.loadingContainer}>
                 <ActivityIndicator size="small" color={colors.primary} />
-                <Text style={styles.loadingText}>Indlæser registreringer...</Text>
+                <Text style={styles.loadingText}>{t('loading')}</Text>
               </View>
             ) : entries.length > 0 ? (
               <View style={styles.entriesSummary}>
                 <Text style={styles.entriesCount}>
-                  {entries.length} registreringer fundet
+                  {t('entriesFound', { count: entries.length })}
                 </Text>
                 <Text style={styles.exportNote}>
-                  {t.exportNote}
+                  {t('exportNote')}
                 </Text>
               </View>
             ) : (
               <Text style={styles.noEntriesText}>
-                {t.noEntriesInPeriod}
+                {t('noEntriesInPeriod')}
               </Text>
             )}
           </View>

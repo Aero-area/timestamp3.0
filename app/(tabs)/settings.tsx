@@ -8,21 +8,13 @@ import {
   ActivityIndicator,
   TextInput,
 } from "react-native";
-import { Save, Clock, RotateCcw, Check, LogOut, Database } from "@/components/icons";
+import { Save, Clock, RotateCcw, Check, LogOut, Database, Globe } from "@/components/icons";
 import { useSettings } from "@/providers/SettingsProvider";
 import { useToast } from "@/providers/ToastProvider";
 import { useAuth } from "@/providers/AuthProvider";
 import { useBackup } from "@/providers/BackupProvider";
 import { Picker } from "@react-native-picker/picker";
 import { colors } from "@/constants/colors";
-import { t } from "@/constants/strings";
-
-const ROUNDING_OPTIONS = [
-  { label: t.noRounding, value: "none" },
-  { label: t.fiveMinutes, value: "5" },
-  { label: t.tenMinutes, value: "10" },
-  { label: t.fifteenMinutes, value: "15" },
-];
 
 export default function SettingsScreen() {
   const { 
@@ -31,13 +23,23 @@ export default function SettingsScreen() {
     rolloverHour, 
     roundingRule, 
     hasUnsavedChanges,
+    language,
+    setLanguage,
     setRolloverDay, 
     setRolloverHour, 
     setRoundingRule, 
     updateSettings,
     saveSettings,
-    loaded 
+    loaded,
+    t
   } = useSettings();
+
+  const ROUNDING_OPTIONS = [
+    { label: t('noRounding'), value: "none" },
+    { label: t('fiveMinutes'), value: "5" },
+    { label: t('tenMinutes'), value: "10" },
+    { label: t('fifteenMinutes'), value: "15" },
+  ];
   
   const { showToast } = useToast();
   const { signOut, user } = useAuth();
@@ -46,13 +48,13 @@ export default function SettingsScreen() {
   const handleSave = async () => {
     // Validate rollover day
     if (rolloverDay < 1 || rolloverDay > 28) {
-      showToast(t.rolloverDayRange, "error");
+      showToast(t('rolloverDayRange'), "error");
       return;
     }
 
     // Validate rollover hour
     if (rolloverHour < 0 || rolloverHour > 23) {
-      showToast(t.rolloverHourRange, "error");
+      showToast(t('rolloverHourRange'), "error");
       return;
     }
 
@@ -67,10 +69,10 @@ export default function SettingsScreen() {
       // Save to both Supabase and AsyncStorage
       await saveSettings();
       
-      // Show success toast in Danish
-      showToast("Gemt", "success");
+      // Show success toast
+      showToast(t('settingsSaved'), "success");
     } catch (error: any) {
-      showToast(error.message || t.failedToSave, "error");
+      showToast(error.message || t('failedToSave'), "error");
     }
   };
 
@@ -98,7 +100,7 @@ export default function SettingsScreen() {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={styles.loadingText}>{t.loading}</Text>
+        <Text style={styles.loadingText}>{t('loading')}</Text>
       </View>
     );
   }
@@ -110,11 +112,11 @@ export default function SettingsScreen() {
         <View style={styles.settingCard}>
           <View style={styles.settingHeader}>
             <RotateCcw size={20} color={colors.primary} />
-            <Text style={styles.settingTitle}>{t.timesheetRolloverDay}</Text>
+            <Text style={styles.settingTitle}>{t('timesheetRolloverDay')}</Text>
           </View>
           
           <Text style={styles.settingDescription}>
-            {t.rolloverDayDescription}
+            {t('rolloverDayDescription')}
           </Text>
           
           <View style={styles.pickerContainer}>
@@ -126,7 +128,7 @@ export default function SettingsScreen() {
               {Array.from({ length: 28 }, (_, i) => i + 1).map((day) => (
                 <Picker.Item
                   key={day}
-                  label={t.dayOfMonth.replace('{day}', day.toString())}
+                  label={t('dayOfMonth', { day: day.toString() })}
                   value={day}
                 />
               ))}
@@ -135,7 +137,7 @@ export default function SettingsScreen() {
           
           <View style={styles.infoBox}>
             <Text style={styles.infoText}>
-              {t.currentSetting.replace('{day}', rolloverDay.toString())}
+              {t('currentSetting', { day: rolloverDay.toString() })}
             </Text>
           </View>
         </View>
@@ -144,15 +146,15 @@ export default function SettingsScreen() {
         <View style={styles.settingCard}>
           <View style={styles.settingHeader}>
             <Clock size={20} color={colors.primary} />
-            <Text style={styles.settingTitle}>{t.rolloverHour}</Text>
+            <Text style={styles.settingTitle}>{t('rolloverHour')}</Text>
           </View>
           
           <Text style={styles.settingDescription}>
-            {t.rolloverHourDescription}
+            {t('rolloverHourDescription')}
           </Text>
           
           <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>{t.rolloverHour}</Text>
+            <Text style={styles.inputLabel}>{t('rolloverHour')}</Text>
             <TextInput
               style={styles.hourInput}
               value={rolloverHour.toString()}
@@ -169,7 +171,7 @@ export default function SettingsScreen() {
           
           <View style={styles.infoBox}>
             <Text style={styles.infoText}>
-              {t.rolloverHourHelp}
+              {t('rolloverHourHelp')}
             </Text>
           </View>
         </View>
@@ -178,11 +180,11 @@ export default function SettingsScreen() {
         <View style={styles.settingCard}>
           <View style={styles.settingHeader}>
             <Clock size={20} color={colors.primary} />
-            <Text style={styles.settingTitle}>{t.timeRoundingRule}</Text>
+            <Text style={styles.settingTitle}>{t('timeRoundingRule')}</Text>
           </View>
           
           <Text style={styles.settingDescription}>
-            {t.roundingDescription}
+            {t('roundingDescription')}
           </Text>
           
           <View style={styles.pickerContainer}>
@@ -203,7 +205,7 @@ export default function SettingsScreen() {
           
           <View style={styles.infoBox}>
             <Text style={styles.infoText}>
-              {t.roundingInfo[roundingRule as keyof typeof t.roundingInfo]}
+              {t('roundingInfo')[roundingRule as keyof typeof t.roundingInfo]}
             </Text>
           </View>
         </View>
@@ -219,7 +221,7 @@ export default function SettingsScreen() {
               styles.resetButtonText,
               !hasUnsavedChanges && styles.disabledText
             ]}>
-              {t.reset}
+              {t('reset')}
             </Text>
           </TouchableOpacity>
           
@@ -234,12 +236,12 @@ export default function SettingsScreen() {
             {hasUnsavedChanges ? (
               <>
                 <Save size={18} color={colors.onPrimary} />
-                <Text style={styles.saveButtonText}>{t.save}</Text>
+                <Text style={styles.saveButtonText}>{t('save')}</Text>
               </>
             ) : (
               <>
                 <Check size={18} color={colors.onPrimary} />
-                <Text style={styles.saveButtonText}>{t.saved}</Text>
+                <Text style={styles.saveButtonText}>{t('saved')}</Text>
               </>
             )}
           </TouchableOpacity>
@@ -250,13 +252,13 @@ export default function SettingsScreen() {
           <View style={styles.settingCard}>
             <View style={styles.settingHeader}>
               <Database size={20} color={colors.success} />
-              <Text style={styles.settingTitle}>{t.dataBackup}</Text>
+              <Text style={styles.settingTitle}>{t('dataBackup')}</Text>
             </View>
             
             <Text style={styles.settingDescription}>
               {lastBackupAt 
-                ? `${t.lastBackup}: ${new Date(lastBackupAt).toLocaleDateString()} at ${new Date(lastBackupAt).toLocaleTimeString()}`
-                : t.noBackupYet}
+                ? `${t('lastBackup')}: ${new Date(lastBackupAt).toLocaleDateString()} at ${new Date(lastBackupAt).toLocaleTimeString()}`
+                : t('noBackupYet')}
             </Text>
             
             <TouchableOpacity
@@ -270,21 +272,44 @@ export default function SettingsScreen() {
                 <Database size={18} color={colors.success} />
               )}
               <Text style={styles.backupButtonText}>
-                {isBackingUp ? t.backingUp : t.backupNow}
+                {isBackingUp ? t('backingUp') : t('backupNow')}
               </Text>
             </TouchableOpacity>
           </View>
         )}
 
+        {/* Language Setting */}
+        <View style={styles.settingCard}>
+          <View style={styles.settingHeader}>
+            <Globe size={20} color={colors.primary} />
+            <Text style={styles.settingTitle}>{t('language')}</Text>
+          </View>
+
+          <Text style={styles.settingDescription}>
+            {t('languageDescription')}
+          </Text>
+
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={language}
+              onValueChange={(value) => setLanguage(value)}
+              style={styles.picker}
+            >
+              <Picker.Item label="English" value="en" />
+              <Picker.Item label="Dansk" value="da" />
+            </Picker>
+          </View>
+        </View>
+
         {/* Account Section */}
         <View style={styles.settingCard}>
           <View style={styles.settingHeader}>
             <LogOut size={20} color={colors.error} />
-            <Text style={styles.settingTitle}>{t.account}</Text>
+            <Text style={styles.settingTitle}>{t('account')}</Text>
           </View>
           
           <Text style={styles.settingDescription}>
-            {t.signedInAs}: {user?.email}
+            {`${t('signedInAs')}: ${user?.email}`}
           </Text>
           
           <TouchableOpacity
@@ -292,21 +317,21 @@ export default function SettingsScreen() {
             onPress={handleLogout}
           >
             <LogOut size={18} color={colors.error} />
-            <Text style={styles.logoutButtonText}>{t.signOut}</Text>
+            <Text style={styles.logoutButtonText}>{t('signOut')}</Text>
           </TouchableOpacity>
         </View>
 
         {/* Additional Info */}
         <View style={styles.helpCard}>
-          <Text style={styles.helpTitle}>{t.aboutSettings}</Text>
+          <Text style={styles.helpTitle}>{t('aboutSettings')}</Text>
           <Text style={styles.helpText}>
-            • {t.rolloverDayHelp}
+            • {t('rolloverDayHelp')}
           </Text>
           <Text style={styles.helpText}>
-            • {t.roundingRulesHelp}
+            • {t('roundingRulesHelp')}
           </Text>
           <Text style={styles.helpText}>
-            • {t.utcConsistency}
+            • {t('utcConsistency')}
           </Text>
         </View>
       </View>

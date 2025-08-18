@@ -1,7 +1,7 @@
-// constants/strings.ts
+// lib/i18n/da.ts
 // Danish language strings for Timestamp 3.0
 
-export const t = {
+export const da = {
   // App metadata
   appName: 'Timestamp 3.0',
   appDescription: 'Tidsregistrering for freelancere',
@@ -75,6 +75,10 @@ export const t = {
   rolloverHour: 'Omdelingstime',
   rolloverHourDescription: 'Time på dagen hvor tidsperioden nulstilles (0-23)',
   rolloverHourHelp: 'Indtast en time mellem 0 og 23. 0 = midnat, 12 = middag, 23 = 23:00',
+
+  // Language
+  language: 'Sprog',
+  languageDescription: 'Vælg sproget for applikationen',
   
   // Data management
   dataBackup: 'Datasikkerhedskopi',
@@ -110,6 +114,7 @@ export const t = {
   end: 'Slut',
   total: 'Total',
   noEntriesInPeriod: 'Ingen registreringer i denne periode endnu',
+  entriesFound: '{count} registreringer fundet',
   
   // Status messages
   settingsSaved: 'Indstillinger gemt succesfuldt',
@@ -121,6 +126,12 @@ export const t = {
   failedToExport: 'Kunne ikke eksportere',
   pleaseSelectDates: 'Vælg venligst både start- og slutdato',
   endDateBeforeStart: 'Slutdato kan ikke være før startdato',
+  failedToLoadEntries: 'Kunne ikke indlæse registreringer for valgt periode',
+  pleaseSelectValidDateRangeWithEntries: 'Vælg venligst en gyldig datoperiode med registreringer',
+  csvDownloadStarted: 'CSV download startet',
+  csvShareOpened: 'CSV-deling åbnet',
+  pdfPrintWindowOpened: 'PDF-printvindue åbnet',
+  pdfShareOpened: 'PDF-deling åbnet',
   
   // Help text
   aboutSettings: 'Om indstillinger',
@@ -175,7 +186,7 @@ export const t = {
   cut: 'Klip',
   undo: 'Fortryd',
   redo: 'Gendan',
-} as const;
+};
 
-export type StringToken = keyof typeof t;
-export default t;
+export type StringToken = keyof typeof da;
+export default da;
