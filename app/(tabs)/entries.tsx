@@ -10,17 +10,18 @@ import { useDayEntries } from "@/providers/DayEntriesProvider";
 import { hhmmCph } from "@/lib/time";
 import type { DayEntry } from "@/types";
 import { colors } from "@/constants/colors";
-import { t } from "@/constants/strings";
+import { useSettings } from "@/providers/SettingsProvider";
 
 export default function EntriesScreen() {
   const { dayEntries, isLoading } = useDayEntries();
+  const { t } = useSettings();
 
   const renderTableHeader = () => (
     <View style={styles.tableHeader}>
-      <Text style={[styles.headerCell, styles.dateColumn]}>{t.date} (CPH)</Text>
-      <Text style={[styles.headerCell, styles.timeColumn]}>{t.start}</Text>
-      <Text style={[styles.headerCell, styles.timeColumn]}>{t.end}</Text>
-      <Text style={[styles.headerCell, styles.totalColumn]}>{t.total}</Text>
+      <Text style={[styles.headerCell, styles.dateColumn]}>{t('date')} (CPH)</Text>
+      <Text style={[styles.headerCell, styles.timeColumn]}>{t('start')}</Text>
+      <Text style={[styles.headerCell, styles.timeColumn]}>{t('end')}</Text>
+      <Text style={[styles.headerCell, styles.totalColumn]}>{t('total')}</Text>
     </View>
   );
 
@@ -41,7 +42,7 @@ export default function EntriesScreen() {
 
   const renderEmptyState = () => (
     <View style={styles.emptyContainer}>
-      <Text style={styles.emptyText}>{t.noEntriesInPeriod}</Text>
+      <Text style={styles.emptyText}>{t('noEntriesInPeriod')}</Text>
     </View>
   );
 

@@ -6,12 +6,13 @@ import { getSupabase } from "@/utils/supabase";
 import { currentPeriodCph, nowCph } from "@/lib/time";
 import type { Settings } from "@/types";
 import { useAuth } from "./AuthProvider";
+import { getTranslator, Language } from "@/lib/i18n";
 
 const DEFAULT_SETTINGS: Settings = {
   rollover_day_utc: 1,
   rollover_hour: 0,
   rounding_rule: "none",
-  language: 'da',
+  language: 'en', // Default to English
   themePrimary: '#008d36',
 };
 
@@ -25,7 +26,7 @@ export const [SettingsProvider, useSettings] = createContextHook(() => {
   const [rolloverDay, setRolloverDay] = useState(DEFAULT_SETTINGS.rollover_day_utc);
   const [rolloverHour, setRolloverHour] = useState(DEFAULT_SETTINGS.rollover_hour);
   const [roundingRule, setRoundingRule] = useState(DEFAULT_SETTINGS.rounding_rule);
-  const [language, setLanguage] = useState(DEFAULT_SETTINGS.language);
+  const [language, setLanguage] = useState<Language>(DEFAULT_SETTINGS.language as Language);
   const [themePrimary, setThemePrimary] = useState(DEFAULT_SETTINGS.themePrimary);
   
   // Loading and sync state
@@ -253,6 +254,9 @@ export const [SettingsProvider, useSettings] = createContextHook(() => {
     return today.date() === rolloverDay;
   }, [rolloverDay]);
 
+  // Create the translator function
+  const t = useMemo(() => getTranslator(language), [language]);
+
   // Current settings object for components
   const settings = useMemo(() => ({
     rollover_day_utc: rolloverDay,
@@ -286,6 +290,9 @@ export const [SettingsProvider, useSettings] = createContextHook(() => {
     saveSettings,
     loadFromSupabase,
     
+    // i18n
+    t,
+
     // Computed values
     currentPeriod,
     isRolloverDay,
@@ -305,6 +312,7 @@ export const [SettingsProvider, useSettings] = createContextHook(() => {
     updateSettings,
     saveSettings,
     loadFromSupabase,
+    t,
     currentPeriod,
     isRolloverDay,
   ]);

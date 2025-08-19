@@ -13,7 +13,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '@/providers/AuthProvider';
 import { LogIn } from '@/components/icons';
 import { colors } from '@/constants/colors';
-import { t } from '@/constants/strings';
+import { getTranslator } from '@/lib/i18n';
+
+const t = getTranslator('en');
 
 export default function LoginScreen() {
   const { signIn, isLoading } = useAuth();
@@ -22,7 +24,7 @@ export default function LoginScreen() {
 
   const handleSignIn = async () => {
     if (!email.trim() || !password.trim()) {
-      Alert.alert(t.error, t.pleaseSelectDates);
+      Alert.alert(t('error'), t('pleaseSelectDates'));
       return;
     }
 
@@ -31,8 +33,8 @@ export default function LoginScreen() {
     if (error) {
       const errorMessage = error && typeof error === 'object' && 'message' in error 
         ? (error as { message: string }).message 
-        : t.checkCredentials;
-      Alert.alert(t.loginFailed, errorMessage);
+        : t('checkCredentials');
+      Alert.alert(t('loginFailed'), errorMessage);
     }
   };
 
@@ -47,18 +49,18 @@ export default function LoginScreen() {
             <View style={styles.iconContainer}>
               <LogIn size={48} color={colors.primary} />
             </View>
-            <Text style={styles.title}>{t.appName}</Text>
-            <Text style={styles.subtitle}>{t.appDescription}</Text>
+            <Text style={styles.title}>{t('appName')}</Text>
+            <Text style={styles.subtitle}>{t('appDescription')}</Text>
           </View>
 
           <View style={styles.form}>
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>{t.email}</Text>
+              <Text style={styles.label}>{t('email')}</Text>
               <TextInput
                 style={styles.input}
                 value={email}
                 onChangeText={setEmail}
-                placeholder={t.enterEmail}
+                placeholder={t('enterEmail')}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -68,12 +70,12 @@ export default function LoginScreen() {
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>{t.password}</Text>
+              <Text style={styles.label}>{t('password')}</Text>
               <TextInput
                 style={styles.input}
                 value={password}
                 onChangeText={setPassword}
-                placeholder={t.enterPassword}
+                placeholder={t('enterPassword')}
                 secureTextEntry
                 autoCapitalize="none"
                 autoCorrect={false}
@@ -88,14 +90,14 @@ export default function LoginScreen() {
               disabled={isLoading}
             >
               <Text style={styles.signInButtonText}>
-                {isLoading ? t.signingIn : t.signIn}
+                {isLoading ? t('signingIn') : t('signIn')}
               </Text>
             </TouchableOpacity>
           </View>
 
           <View style={styles.footer}>
             <Text style={styles.footerText}>
-              {t.signupsDisabled}
+              {t('signupsDisabled')}
             </Text>
           </View>
         </View>

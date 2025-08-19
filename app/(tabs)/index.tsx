@@ -12,11 +12,10 @@ import { Play, Calendar, AlertCircle } from "@/components/icons";
 import { useTimeTracking } from "@/providers/TimeTrackingProvider";
 import { useSettings } from "@/providers/SettingsProvider";
 import { colors } from "@/constants/colors";
-import { t } from "@/constants/strings";
 
 export default function HomeScreen() {
   const { onStamp } = useTimeTracking();
-  const { settings, currentPeriod, isRolloverDay, loaded } = useSettings();
+  const { settings, currentPeriod, isRolloverDay, loaded, t } = useSettings();
   const [isStamping, setIsStamping] = useState(false);
 
   const handleStamp = async () => {
@@ -37,7 +36,7 @@ export default function HomeScreen() {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={styles.loadingText}>{t.loading}</Text>
+        <Text style={styles.loadingText}>{t('loading')}</Text>
       </View>
     );
   }
@@ -54,14 +53,14 @@ export default function HomeScreen() {
       <View style={styles.periodBanner}>
         <View style={styles.periodHeader}>
           <Calendar size={20} color={colors.textMuted} />
-          <Text style={styles.periodLabel}>{t.currentTimesheetPeriod}</Text>
+          <Text style={styles.periodLabel}>{t('currentTimesheetPeriod')}</Text>
         </View>
         <Text style={styles.periodDates}>
           {currentPeriod?.start || "--"} → {currentPeriod?.end || "--"}
         </Text>
         <View style={styles.rolloverBadge}>
           <Text style={styles.rolloverText}>
-            {t.rolloverOnDay} {settings.rollover_day_utc} (Copenhagen)
+            {t('rolloverOnDay')} {settings.rollover_day_utc} (Copenhagen)
           </Text>
         </View>
       </View>
@@ -71,7 +70,7 @@ export default function HomeScreen() {
         <View style={styles.infoBanner}>
           <AlertCircle size={16} color={colors.info} />
           <Text style={styles.infoText}>
-            {t.rolloverHappensTonight}
+            {t('rolloverHappensTonight')}
           </Text>
         </View>
       )}
@@ -79,7 +78,7 @@ export default function HomeScreen() {
       {/* Stamp Button */}
       <View style={styles.stampSection}>
         <Text style={styles.stampLabel}>
-          {t.tapToRecord}
+          {t('tapToRecord')}
         </Text>
         <TouchableOpacity
           style={[
@@ -95,12 +94,12 @@ export default function HomeScreen() {
           ) : (
             <>
               <Play size={32} color={colors.onPrimary} fill={colors.onPrimary} />
-              <Text style={styles.buttonText}>{t.stamp}</Text>
+              <Text style={styles.buttonText}>{t('stamp')}</Text>
             </>
           )}
         </TouchableOpacity>
         <Text style={styles.stampDescription}>
-          {t.stampDescription}
+          {t('stampDescription')}
         </Text>
       </View>
     </ScrollView>
