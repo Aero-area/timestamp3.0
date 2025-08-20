@@ -45,11 +45,17 @@ export default function EntriesScreen() {
       const start = dayjs(entry.start_ts);
       setStartHour(start.hour().toString());
       setStartMinute(start.minute().toString());
+    } else {
+      setStartHour("0");
+      setStartMinute("0");
     }
     if (entry.end_ts) {
       const end = dayjs(entry.end_ts);
       setEndHour(end.hour().toString());
       setEndMinute(end.minute().toString());
+    } else {
+      setEndHour("0");
+      setEndMinute("0");
     }
     setModalVisible(true);
   };
@@ -144,14 +150,9 @@ export default function EntriesScreen() {
         <View style={styles.modalContainer}>
           <View style={styles.modalView}>
             {!selectedDate ? (
-              <Calendar
-                onDayPress={(day) => {
-                  setSelectedDate(day.dateString);
-                }}
-                markedDates={{
-                  [selectedDate]: { selected: true, disableTouchEvent: true, selectedColor: 'blue' }
-                }}
-              />
+              <TouchableOpacity onPress={() => setSelectedDate(dayjs().format('YYYY-MM-DD'))}>
+                <Text>Select a date</Text>
+              </TouchableOpacity>
             ) : (
               <>
                 <Text>{t('selectedDate', { date: selectedDate })}</Text>
