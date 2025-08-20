@@ -13,6 +13,7 @@ import { useToast } from "@/providers/ToastProvider";
 import { useDayEntries } from "@/providers/DayEntriesProvider";
 import { useSettings } from "@/providers/SettingsProvider";
 import { exportCsv, exportPdf } from "@/lib/export";
+import { previousPeriodCph } from "@/lib/time";
 import { colors } from "@/constants/colors";
 
 export default function ReportsScreen() {
@@ -112,6 +113,23 @@ export default function ReportsScreen() {
     setDateFrom(lastWeek.toISOString().split("T")[0]);
   };
 
+  const setLast30Days = () => {
+    const today = new Date();
+    const last30 = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    setDateTo(today.toISOString().split("T")[0]);
+    setDateFrom(last30.toISOString().split("T")[0]);
+  }
+
+  const setLastRollover = () => {
+    const { startDateKey, endDateKey } = previousPeriodCph(
+      settings.rollover_day_utc,
+      settings.rollover_hour
+    );
+    setDateFrom(startDateKey);
+    setDateTo(endDateKey);
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.content}>
@@ -151,12 +169,26 @@ export default function ReportsScreen() {
             </View>
           </View>
 
-          <TouchableOpacity
-            style={styles.quickButton}
-            onPress={setLast7Days}
-          >
-            <Text style={styles.quickButtonText}>{t('last7Days')}</Text>
-          </TouchableOpacity>
+          <View style={styles.quickButtonsContainer}>
+            <TouchableOpacity
+              style={styles.quickButton}
+              onPress={setLast7Days}
+            >
+              <Text style={styles.quickButtonText}>{t('last7Days')}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.quickButton}
+              onPress={setLast30Days}
+            >
+              <Text style={styles.quickButtonText}>{t('last30Days')}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.quickButton}
+              onPress={setLastRollover}
+            >
+              <Text style={styles.quickButtonText}>{t('lastRollover')}</Text>
+            </TouchableOpacity>
+          </View>
 
           {/* Date validation message */}
           {dateFrom && dateTo && !isValidDateRange && (
@@ -318,6 +350,11 @@ const styles = StyleSheet.create({
   validationText: {
     fontSize: 14,
     color: colors.error,
+  },
+  quickButtonsContainer: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 16,
   },
   quickButton: {
     backgroundColor: colors.backgroundTertiary,

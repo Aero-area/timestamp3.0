@@ -115,6 +115,12 @@ export const en = {
   total: 'Total',
   noEntriesInPeriod: 'No entries in this period yet',
   entriesFound: '{count} entries found',
+  editAdd: 'Edit / Add',
+  timeEntries: 'Time Entries',
+  last30Days: 'Last 30 days',
+  lastRollover: 'Last Rollover',
+  addEntry: 'Add Entry',
+  selectedDate: 'Selected date: {date}',
 
   // Status messages
   settingsSaved: 'Settings saved successfully',

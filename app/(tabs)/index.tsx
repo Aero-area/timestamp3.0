@@ -3,7 +3,7 @@ import {
   StyleSheet,
   Text,
   View,
-  TouchableOpacity,
+  Pressable,
   ActivityIndicator,
   ScrollView,
   RefreshControl,
@@ -80,14 +80,14 @@ export default function HomeScreen() {
         <Text style={styles.stampLabel}>
           {t('tapToRecord')}
         </Text>
-        <TouchableOpacity
-          style={[
+        <Pressable
+          style={({ pressed }) => [
             styles.stampButton,
             isStamping && styles.disabledButton,
+            pressed && { transform: [{ scale: 0.98 }] },
           ]}
           onPress={handleStamp}
           disabled={isStamping}
-          activeOpacity={0.8}
         >
           {isStamping ? (
             <ActivityIndicator size="large" color={colors.onPrimary} />
@@ -97,7 +97,7 @@ export default function HomeScreen() {
               <Text style={styles.buttonText}>{t('stamp')}</Text>
             </>
           )}
-        </TouchableOpacity>
+        </Pressable>
         <Text style={styles.stampDescription}>
           {t('stampDescription')}
         </Text>

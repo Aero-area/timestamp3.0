@@ -115,6 +115,12 @@ export const da = {
   total: 'Total',
   noEntriesInPeriod: 'Ingen registreringer i denne periode endnu',
   entriesFound: '{count} registreringer fundet',
+  editAdd: 'Rediger / Tilføj',
+  timeEntries: 'Tidsregistreringer',
+  last30Days: 'Sidste 30 dage',
+  lastRollover: 'Sidste omdeling',
+  addEntry: 'Tilføj registrering',
+  selectedDate: 'Valgt dato: {date}',
   
   // Status messages
   settingsSaved: 'Indstillinger gemt succesfuldt',
