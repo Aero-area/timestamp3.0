@@ -32,6 +32,9 @@ export const Check         = (p: P) => <Feather name="check" {...p} />;
 export const Download      = (p: P) => <Feather name="download" {...p} />;
 export const FileText      = (p: P) => <Feather name="file-text" {...p} />;
 export const Globe         = (p: P) => <Feather name="globe" {...p} />;
+export const Plus          = (p: P) => <Feather name="plus" {...p} />;
+export const Trash         = (p: P) => <Feather name="trash-2" {...p} />;
+export const Edit          = (p: P) => <Feather name="edit" {...p} />;
 
 // default export so accidental `import Icons from '@/components/icons'` still works
 const Icons = {
@@ -40,6 +43,6 @@ const Icons = {
   LogIn, LogOut, RefreshCw,
   FileSpreadsheet, Database, Play,
   Save, Clock, RotateCcw, Check, Download, FileText,
-  Globe,
+  Globe, Plus, Trash, Edit,
 };
 export default Icons;
