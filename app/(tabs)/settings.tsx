@@ -210,43 +210,6 @@ export default function SettingsScreen() {
           </View>
         </View>
 
-        {/* Action Buttons */}
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={styles.resetButton}
-            onPress={handleReset}
-            disabled={!hasUnsavedChanges}
-          >
-            <Text style={[
-              styles.resetButtonText,
-              !hasUnsavedChanges && styles.disabledText
-            ]}>
-              {t('reset')}
-            </Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity
-            style={[
-              styles.saveButton,
-              !hasUnsavedChanges && styles.saveButtonDisabled
-            ]}
-            onPress={handleSave}
-            disabled={!hasUnsavedChanges}
-          >
-            {hasUnsavedChanges ? (
-              <>
-                <Save size={18} color={colors.onPrimary} />
-                <Text style={styles.saveButtonText}>{t('save')}</Text>
-              </>
-            ) : (
-              <>
-                <Check size={18} color={colors.onPrimary} />
-                <Text style={styles.saveButtonText}>{t('saved')}</Text>
-              </>
-            )}
-          </TouchableOpacity>
-        </View>
-
         {/* Backup Section */}
         {backupEnabled && (
           <View style={styles.settingCard}>
@@ -299,6 +262,43 @@ export default function SettingsScreen() {
               <Picker.Item label="Dansk" value="da" />
             </Picker>
           </View>
+        </View>
+
+        {/* Action Buttons */}
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={styles.resetButton}
+            onPress={handleReset}
+            disabled={!hasUnsavedChanges}
+          >
+            <Text style={[
+              styles.resetButtonText,
+              !hasUnsavedChanges && styles.disabledText
+            ]}>
+              {t('reset')}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.saveButton,
+              !hasUnsavedChanges && styles.saveButtonDisabled
+            ]}
+            onPress={handleSave}
+            disabled={!hasUnsavedChanges}
+          >
+            {hasUnsavedChanges ? (
+              <>
+                <Save size={18} color={colors.onPrimary} />
+                <Text style={styles.saveButtonText}>{t('save')}</Text>
+              </>
+            ) : (
+              <>
+                <Check size={18} color={colors.onPrimary} />
+                <Text style={styles.saveButtonText}>{t('saved')}</Text>
+              </>
+            )}
+          </TouchableOpacity>
         </View>
 
         {/* Account Section */}

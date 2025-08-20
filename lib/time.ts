@@ -53,18 +53,7 @@ export function formatDurationHMS(seconds: number) {
 // Today as a Copenhagen day key
 export const getTodayCphKey = () => nowCph().format('YYYY-MM-DD');
 
-// Current rollover window computed in Copenhagen; returns day-key strings [start, end)
-// REQUIRES: rolloverDay and rolloverHour from settings context
-export function currentPeriodCph(rolloverDay: number, rolloverHour: number) {
-  if (rolloverDay < 1 || rolloverDay > 28) {
-    throw new Error(`Invalid rollover day: ${rolloverDay}. Must be between 1 and 28.`);
-  }
-  
-  if (rolloverHour < 0 || rolloverHour > 23) {
-    throw new Error(`Invalid rollover hour: ${rolloverHour}. Must be between 0 and 23.`);
-  }
-  
-  const base = dayjs().tz(TZ);
+function getPeriodForDate(base: dayjs.Dayjs, rolloverDay: number, rolloverHour: number) {
   const thisStart = base.date(rolloverDay).hour(rolloverHour).minute(0).second(0).millisecond(0);
   
   if (base.isAfter(thisStart)) {
@@ -80,6 +69,29 @@ export function currentPeriodCph(rolloverDay: number, rolloverHour: number) {
       endDateKey: thisStart.format('YYYY-MM-DD') 
     };
   }
+}
+
+// Current rollover window computed in Copenhagen; returns day-key strings [start, end)
+// REQUIRES: rolloverDay and rolloverHour from settings context
+export function currentPeriodCph(rolloverDay: number, rolloverHour: number) {
+  if (rolloverDay < 1 || rolloverDay > 28) {
+    throw new Error(`Invalid rollover day: ${rolloverDay}. Must be between 1 and 28.`);
+  }
+
+  if (rolloverHour < 0 || rolloverHour > 23) {
+    throw new Error(`Invalid rollover hour: ${rolloverHour}. Must be between 0 and 23.`);
+  }
+
+  const base = dayjs().tz(TZ);
+  return getPeriodForDate(base, rolloverDay, rolloverHour);
+}
+
+// Previous rollover window computed in Copenhagen; returns day-key strings [start, end)
+export function previousPeriodCph(rolloverDay: number, rolloverHour: number) {
+  const { startDateKey } = currentPeriodCph(rolloverDay, rolloverHour);
+  const currentStart = toCph(startDateKey);
+  const dateInPrevPeriod = currentStart.subtract(1, 'day');
+  return getPeriodForDate(dateInPrevPeriod, rolloverDay, rolloverHour);
 }
 
 // Helper to check if a timestamp is in the current logical period

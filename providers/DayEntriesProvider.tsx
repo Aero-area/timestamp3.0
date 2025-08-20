@@ -210,11 +210,89 @@ export const [DayEntriesProvider, useDayEntries] = createContextHook(() => {
     }
   }, [performStamp, queueStamp]);
 
+  const deleteEntry = useCallback(async (dateUtc: string) => {
+    const supabase = getSupabase();
+    if (!supabase || !user) {
+      throw new Error('Supabase not initialized or user not authenticated');
+    }
+
+    try {
+      const { error } = await supabase
+        .from('day_entries')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('date_utc', dateUtc);
+
+      if (error) {
+        throw error;
+      }
+
+      await loadEntries();
+      showToast('Entry deleted', 'success');
+    } catch (error) {
+      console.error('Failed to delete entry:', error);
+      showToast('Failed to delete entry', 'error');
+    }
+  }, [user, loadEntries, showToast]);
+
+  const addEntry = useCallback(async (entry: Omit<DayEntry, 'user_id' | 'total_hhmm'>) => {
+    const supabase = getSupabase();
+    if (!supabase || !user) {
+      throw new Error('Supabase not initialized or user not authenticated');
+    }
+
+    try {
+      const total_hhmm = durationHHMM(entry.start_ts, entry.end_ts);
+      const { error } = await supabase
+        .from('day_entries')
+        .insert({ ...entry, user_id: user.id, total_hhmm });
+
+      if (error) {
+        throw error;
+      }
+
+      await loadEntries();
+      showToast('Entry added', 'success');
+    } catch (error) {
+      console.error('Failed to add entry:', error);
+      showToast('Failed to add entry', 'error');
+    }
+  }, [user, loadEntries, showToast]);
+
+  const updateEntry = useCallback(async (dateUtc: string, entry: Partial<DayEntry>) => {
+    const supabase = getSupabase();
+    if (!supabase || !user) {
+      throw new Error('Supabase not initialized or user not authenticated');
+    }
+
+    try {
+      const total_hhmm = entry.start_ts && entry.end_ts ? durationHHMM(entry.start_ts, entry.end_ts) : undefined;
+      const { error } = await supabase
+        .from('day_entries')
+        .update({ ...entry, total_hhmm })
+        .eq('user_id', user.id)
+        .eq('date_utc', dateUtc);
+
+      if (error) {
+        throw error;
+      }
+
+      await loadEntries();
+      showToast('Entry updated', 'success');
+    } catch (error) {
+      console.error('Failed to update entry:', error);
+      showToast('Failed to update entry', 'error');
+    }
+  }, [user, loadEntries, showToast]);
+
   return useMemo(() => ({
     dayEntries,
     onStamp,
     isLoading,
     refreshEntries: loadEntries,
     getEntriesBetween,
-  }), [dayEntries, onStamp, isLoading, loadEntries, getEntriesBetween]);
+    deleteEntry,
+    addEntry,
+    updateEntry,
+  }), [dayEntries, onStamp, isLoading, loadEntries, getEntriesBetween, deleteEntry, addEntry, updateEntry]);
 });
